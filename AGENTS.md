@@ -52,7 +52,6 @@ Cross-platform metronome app built with Expo/React Native, targeting iOS, Androi
 
 ### Time Signature
 - Presets: 2/4, 3/4, 4/4, 5/4, 6/8, 7/8
-- Custom: Beats per measure selector (1-16)
 
 ### Subdivisions
 - None (main beats only)
