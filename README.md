@@ -48,3 +48,32 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Deployment (GitHub Pages)
+
+This project can be deployed as a static web build to GitHub Pages under the path `/metronom`.
+
+### 1. Build locally
+
+```bash
+npm run build:web
+```
+
+The static site is generated in `dist/`.
+
+### 2. Automatic deployment via CI
+
+A GitHub Actions workflow (`.github/workflows/deploy.yml`) builds the web export and publishes it to the `gh-pages` branch on pushes to `main`.
+
+### 3. Enable Pages
+
+In your repository settings, set GitHub Pages to use the `gh-pages` branch and the root directory. The site will be available at `https://<username>.github.io/metronom`.
+
+### 4. Asset paths
+
+The environment variable `PUBLIC_URL=/metronom` ensures all assets resolve correctly when served from the subpath. The workflow also creates a `.nojekyll` file to prevent GitHub Pages from ignoring asset directories that start with an underscore.
+
+### 5. Manual deploy (optional)
+
+You can manually publish after building using any static hosting provider by serving the `dist/` directory.
+
