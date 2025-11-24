@@ -173,7 +173,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20,
     paddingVertical: 16,
-  },
+    userSelect: 'none',
+  } as any,
   bpmRow: {
     flexDirection: 'row',
     alignItems: 'center',

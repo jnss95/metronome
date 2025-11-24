@@ -69,7 +69,8 @@ const colors = {
 const styles = StyleSheet.create({
   container: {
     gap: 12,
-  },
+    userSelect: 'none',
+  } as any,
   label: {
     fontSize: 14,
     fontWeight: '500',
