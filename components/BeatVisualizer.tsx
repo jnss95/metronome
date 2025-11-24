@@ -12,8 +12,9 @@ interface BeatVisualizerProps {
 /**
  * Beat visualization component showing horizontal bars
  * that light up on the current beat/subdivision.
- * 
+ *
  * Layout: Stacked bars showing subdivision structure
+ * Animates from top to bottom (first subdivision at top)
  * (e.g., 4/4 + triplets = 4 stacks of 3 bars)
  */
 export function BeatVisualizer({
@@ -26,45 +27,44 @@ export function BeatVisualizer({
   return (
     <View style={styles.container}>
       <View style={styles.beatsRow}>
-        {Array.from({ length: beats }).map((_, beatIndex) => (
-          <View key={beatIndex} style={styles.beatColumn}>
-            {/* Subdivision bars stacked vertically */}
-            <View style={styles.subdivisionStack}>
-              {Array.from({ length: subdivisionCount }).map((_, subIndex) => {
-                const isActive =
-                  isPlaying &&
-                  beatIndex === currentBeat &&
-                  subIndex === currentSubdivision;
-                const isDownbeat = beatIndex === 0 && subIndex === 0;
-                const isMainBeat = subIndex === 0;
+        {Array.from({ length: beats }).map((_, beatIndex) => {
+          const isDownbeatColumn = beatIndex === 0;
 
-                return (
-                  <View
-                    key={subIndex}
-                    style={[
-                      styles.bar,
-                      isDownbeat && styles.barDownbeat,
-                      isMainBeat && !isDownbeat && styles.barMainBeat,
-                      !isMainBeat && styles.barSubdivision,
-                      isActive && styles.barActive,
-                      isActive && isDownbeat && styles.barActiveDownbeat,
-                      isActive && isMainBeat && !isDownbeat && styles.barActiveMainBeat,
-                      isActive && !isMainBeat && styles.barActiveSubdivision,
-                    ]}
-                  />
-                );
-              })}
+          return (
+            <View key={beatIndex} style={styles.beatColumn}>
+              {/* Subdivision bars stacked vertically (top to bottom) */}
+              <View style={styles.subdivisionStack}>
+                {Array.from({ length: subdivisionCount }).map((_, subIndex) => {
+                  const isActive =
+                    isPlaying &&
+                    beatIndex === currentBeat &&
+                    subIndex === currentSubdivision;
+                  const isMainBeat = subIndex === 0;
+                  const isDownbeat = isDownbeatColumn && isMainBeat;
+
+                  return (
+                    <View
+                      key={subIndex}
+                      style={[
+                        styles.bar,
+                        isDownbeat && styles.barDownbeat,
+                        isMainBeat && !isDownbeat && styles.barMainBeat,
+                        !isMainBeat && styles.barSubdivision,
+                        isActive && styles.barActive,
+                        isActive && isDownbeat && styles.barActiveDownbeat,
+                        isActive &&
+                          isMainBeat &&
+                          !isDownbeat &&
+                          styles.barActiveMainBeat,
+                        isActive && !isMainBeat && styles.barActiveSubdivision,
+                      ]}
+                    />
+                  );
+                })}
+              </View>
             </View>
-            {/* Beat number indicator */}
-            <View
-              style={[
-                styles.beatIndicator,
-                beatIndex === 0 && styles.beatIndicatorDownbeat,
-                isPlaying && beatIndex === currentBeat && styles.beatIndicatorActive,
-              ]}
-            />
-          </View>
-        ))}
+          );
+        })}
       </View>
     </View>
   );
@@ -102,33 +102,30 @@ const styles = StyleSheet.create({
   beatsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'flex-end',
-    gap: 12,
+    alignItems: 'flex-start',
+    gap: 8,
   },
   beatColumn: {
     alignItems: 'center',
-    gap: 8,
   },
   subdivisionStack: {
-    flexDirection: 'column-reverse', // Stack from bottom
-    gap: 4,
+    flexDirection: 'column',
+    gap: 6,
   },
   bar: {
-    width: 48,
-    height: 24,
-    borderRadius: 6,
+    width: 56,
+    height: 32,
+    borderRadius: 8,
     backgroundColor: colors.inactive,
   },
   barDownbeat: {
     backgroundColor: colors.primaryContainer,
-    height: 28,
   },
   barMainBeat: {
     backgroundColor: colors.secondaryContainer,
   },
   barSubdivision: {
     backgroundColor: colors.inactiveSubdivision,
-    height: 20,
   },
   barActive: {
     transform: [{ scale: 1.05 }],
@@ -153,20 +150,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
-  },
-  beatIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.inactive,
-  },
-  beatIndicatorDownbeat: {
-    backgroundColor: colors.primaryContainer,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  beatIndicatorActive: {
-    backgroundColor: colors.primary,
   },
 });
