@@ -1,11 +1,10 @@
 import React from 'react';
 import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text
 } from 'react-native';
 
 interface SettingModalProps {

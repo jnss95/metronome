@@ -14,7 +14,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      PUBLIC_URL: /metronom
+      PUBLIC_URL: /metronome
     steps:
       - name: Checkout
         uses: actions/checkout@v4

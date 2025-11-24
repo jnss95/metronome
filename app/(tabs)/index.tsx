@@ -3,8 +3,8 @@ import {
   BpmControls,
   SettingButton,
   SettingModal,
-  SubdivisionSelector,
   SUBDIVISION_LABELS,
+  SubdivisionSelector,
   TimeSignatureSelector,
   VolumeControl,
 } from '@/components';

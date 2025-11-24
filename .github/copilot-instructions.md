@@ -41,7 +41,7 @@ Use `Platform.OS` checks for platform-specific styling. System dark/light mode i
 
 ## Deployment
 - **Web**: Auto-deploys to GitHub Pages on push to `main` (see `.github/workflows/deploy.yml`)
-- **Build output**: `dist/` directory with `PUBLIC_URL=/metronom`
+- **Build output**: `dist/` directory with `PUBLIC_URL=/metronome`
 
 ## Dependencies to Know
 - `expo-router` - File-based routing
