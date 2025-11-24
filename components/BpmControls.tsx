@@ -61,25 +61,13 @@ export function BpmControls({
     <View style={styles.container}>
       {/* BPM Display with +/- buttons on sides */}
       <View style={styles.bpmRow}>
-        {/* Left side buttons */}
-        <View style={styles.sideButtons}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              styles.buttonSmall,
-              pressed && styles.buttonPressed,
-            ]}
-            onPress={() => onIncrement(-5)}
-          >
-            <Text style={styles.buttonText}>-5</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-            onPress={() => onIncrement(-1)}
-          >
-            <Text style={styles.buttonText}>−</Text>
-          </Pressable>
-        </View>
+        {/* Left side button */}
+        <Pressable
+          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+          onPress={() => onIncrement(-1)}
+        >
+          <Text style={styles.buttonText}>−</Text>
+        </Pressable>
 
         {/* BPM Display */}
         <View style={styles.bpmDisplay}>
@@ -108,25 +96,13 @@ export function BpmControls({
           <Text style={styles.bpmLabel}>BPM</Text>
         </View>
 
-        {/* Right side buttons */}
-        <View style={styles.sideButtons}>
-          <Pressable
-            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-            onPress={() => onIncrement(1)}
-          >
-            <Text style={styles.buttonText}>+</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              styles.buttonSmall,
-              pressed && styles.buttonPressed,
-            ]}
-            onPress={() => onIncrement(5)}
-          >
-            <Text style={styles.buttonText}>+5</Text>
-          </Pressable>
-        </View>
+        {/* Right side button */}
+        <Pressable
+          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+          onPress={() => onIncrement(1)}
+        >
+          <Text style={styles.buttonText}>+</Text>
+        </Pressable>
       </View>
 
       {/* Slider (Web only for now) */}
@@ -203,11 +179,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
   },
-  sideButtons: {
-    flexDirection: 'row',
-    gap: 8,
-    alignItems: 'center',
-  },
   bpmDisplay: {
     alignItems: 'center',
     minWidth: 140,
@@ -241,11 +212,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceVariant,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  buttonSmall: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
   },
   buttonPressed: {
     backgroundColor: colors.primaryContainer,
