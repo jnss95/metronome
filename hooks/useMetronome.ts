@@ -18,6 +18,13 @@ export interface MetronomeState {
   volume: number;
 }
 
+export interface MetronomeSettings {
+  bpm: number;
+  timeSignature: TimeSignature;
+  subdivision: SubdivisionType;
+  volume: number;
+}
+
 // Subdivision multipliers
 const SUBDIVISION_COUNTS: Record<SubdivisionType, number> = {
   none: 1,
@@ -44,6 +51,7 @@ interface UseMetronomeOptions {
   initialTimeSignature?: TimeSignature;
   initialSubdivision?: SubdivisionType;
   initialVolume?: number;
+  onSettingsChange?: (settings: MetronomeSettings) => void;
 }
 
 export function useMetronome(options: UseMetronomeOptions = {}) {
@@ -52,16 +60,46 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
     initialTimeSignature = { beats: 4, noteValue: 4 },
     initialSubdivision = 'none',
     initialVolume = 0.7,
+    onSettingsChange,
   } = options;
 
   // State
   const [bpm, setBpmState] = useState(initialBpm);
-  const [timeSignature, setTimeSignature] = useState<TimeSignature>(initialTimeSignature);
-  const [subdivision, setSubdivision] = useState<SubdivisionType>(initialSubdivision);
+  const [timeSignature, setTimeSignatureState] = useState<TimeSignature>(initialTimeSignature);
+  const [subdivision, setSubdivisionState] = useState<SubdivisionType>(initialSubdivision);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(0);
   const [currentSubdivision, setCurrentSubdivision] = useState(0);
-  const [volume, setVolume] = useState(initialVolume);
+  const [volume, setVolumeState] = useState(initialVolume);
+
+  // Ref for onSettingsChange to avoid stale closures
+  const onSettingsChangeRef = useRef(onSettingsChange);
+  useEffect(() => {
+    onSettingsChangeRef.current = onSettingsChange;
+  }, [onSettingsChange]);
+
+  // Wrapped setters that also trigger persistence
+  const setTimeSignature = useCallback((ts: TimeSignature) => {
+    setTimeSignatureState(ts);
+  }, []);
+
+  const setSubdivision = useCallback((sub: SubdivisionType) => {
+    setSubdivisionState(sub);
+  }, []);
+
+  const setVolume = useCallback((vol: number) => {
+    setVolumeState(vol);
+  }, []);
+
+  // Notify parent when settings change
+  useEffect(() => {
+    onSettingsChangeRef.current?.({
+      bpm,
+      timeSignature,
+      subdivision,
+      volume,
+    });
+  }, [bpm, timeSignature, subdivision, volume]);
 
   // Audio engine
   const audioEngine = useAudioEngine({ volume });

@@ -8,12 +8,21 @@ import {
   TimeSignatureSelector,
   VolumeControl,
 } from '@/components';
-import { useMetronome } from '@/hooks';
+import { useMetronome, useSettingsPersistence } from '@/hooks';
 import { useCallback, useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 export default function HomeScreen() {
-  const metronome = useMetronome();
+  const { settings, isLoaded, updateSettings } = useSettingsPersistence();
+
+  const metronome = useMetronome({
+    initialBpm: settings.bpm,
+    initialTimeSignature: settings.timeSignature,
+    initialSubdivision: settings.subdivision,
+    initialVolume: settings.volume,
+    onSettingsChange: updateSettings,
+  });
+
   const [timeSignatureModalVisible, setTimeSignatureModalVisible] = useState(false);
   const [subdivisionModalVisible, setSubdivisionModalVisible] = useState(false);
 
@@ -35,6 +44,15 @@ export default function HomeScreen() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  // Show loading indicator while settings are being loaded
+  if (!isLoaded) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   const timeSignatureDisplay = `${metronome.timeSignature.beats}/${metronome.timeSignature.noteValue}`;
   const subdivisionDisplay = SUBDIVISION_LABELS[metronome.subdivision];
@@ -123,12 +141,17 @@ export default function HomeScreen() {
 const colors = {
   background: '#1C1B1F',
   surface: '#1C1B1F',
+  primary: '#D0BCFF',
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollView: {
     flex: 1,
