@@ -12,9 +12,14 @@ import { useMetronome, useSettingsPersistence } from '@/hooks';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
-export default function HomeScreen() {
-  const { settings, isLoaded, updateSettings } = useSettingsPersistence();
-
+// Inner component that only renders after settings are loaded
+function MetronomeContent({
+  settings,
+  updateSettings,
+}: {
+  settings: ReturnType<typeof useSettingsPersistence>['settings'];
+  updateSettings: ReturnType<typeof useSettingsPersistence>['updateSettings'];
+}) {
   const metronome = useMetronome({
     initialBpm: settings.bpm,
     initialTimeSignature: settings.timeSignature,
@@ -44,15 +49,6 @@ export default function HomeScreen() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
-
-  // Show loading indicator while settings are being loaded
-  if (!isLoaded) {
-    return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
 
   const timeSignatureDisplay = `${metronome.timeSignature.beats}/${metronome.timeSignature.noteValue}`;
   const subdivisionDisplay = SUBDIVISION_LABELS[metronome.subdivision];
@@ -135,6 +131,22 @@ export default function HomeScreen() {
       </SettingModal>
     </View>
   );
+}
+
+export default function HomeScreen() {
+  const { settings, isLoaded, updateSettings } = useSettingsPersistence();
+
+  // Show loading indicator while settings are being loaded
+  if (!isLoaded) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  // Only render metronome after settings are loaded to ensure correct initial values
+  return <MetronomeContent settings={settings} updateSettings={updateSettings} />;
 }
 
 // Material Design 3 colors
