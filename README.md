@@ -1,53 +1,103 @@
-# Welcome to your Expo app 👋
+# Metronome 🎵
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A cross-platform metronome app built with Expo and React Native, targeting iOS, Android, and Web.
 
-## Get started
+**[Try it live on GitHub Pages →](https://jnss95.github.io/metronome)**
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- **Precise Audio Engine** – Synthesized percussive click sounds with distinct tones for downbeats, main beats, and subdivisions
+- **Time Signatures** – Support for 2/4, 3/4, 4/4, 5/4, 6/8, and 7/8
+- **Subdivisions** – None, eighth notes, triplets, or sixteenth notes
+- **Flexible BPM Control** – Tap tempo, ±1 buttons, slider, and manual input (20–300 BPM)
+- **Beat Visualization** – Animated horizontal bars that light up on the current beat
+- **Platform-Adaptive Design** – Material Design 3 on Android/Web, Liquid Glass on iOS 26
+- **Dark/Light Mode** – Automatic system theme detection
+- **Offline Support** – Works without an internet connection
+- **Settings Persistence** – Your preferences are saved between sessions
 
-2. Start the app
+## Getting Started
 
-   ```bash
-   npx expo start
-   ```
+### Prerequisites
 
-In the output, you'll find options to open the app in a
+- Node.js 18+
+- npm or yarn
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Installation
 
 ```bash
-npm run reset-project
+# Clone the repository
+git clone https://github.com/jnss95/metronome.git
+cd metronome
+
+# Install dependencies
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Development
 
-## Learn more
+```bash
+# Start Expo dev server
+npm start
 
-To learn more about developing your project with Expo, look at the following resources:
+# Run on specific platform
+npm run ios       # iOS Simulator
+npm run android   # Android Emulator
+npm run web       # Web browser
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Production Build
 
-## Join the community
+```bash
+# Build for web (outputs to dist/)
+npm run build:web
+```
 
-Join our community of developers creating universal apps.
+## Tech Stack
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **Framework**: [Expo SDK 54](https://expo.dev) / React Native 0.81
+- **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (file-based)
+- **Animations**: [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
+- **Haptics**: [Expo Haptics](https://docs.expo.dev/versions/latest/sdk/haptics/)
+- **Audio**: Web Audio API
+- **Deployment**: GitHub Actions → GitHub Pages
+
+## Project Structure
+
+```
+app/
+├── _layout.tsx          # Root layout (Stack)
+├── (tabs)/
+│   ├── _layout.tsx      # Tab navigation
+│   └── index.tsx        # Main metronome screen
+components/
+├── BeatVisualizer.tsx   # Beat visualization bars
+├── BpmControls.tsx      # BPM adjustment controls
+├── TimeSignatureSelector.tsx
+├── SubdivisionSelector.tsx
+└── ...
+hooks/
+├── useAudioEngine.ts    # Audio synthesis & scheduling
+├── useMetronome.ts      # Core metronome logic
+└── useSettingsPersistence.ts
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feat/amazing-feature`)
+3. Run linting before committing (`npm run lint`)
+4. Commit with conventional commits (`git commit -m 'feat: add amazing feature'`)
+5. Push to the branch (`git push origin feat/amazing-feature`)
+6. Open a Pull Request
+
+## License
+
+This project is private.
+
+---
+
+Built with ❤️ using [Expo](https://expo.dev)
 
 ## Deployment (GitHub Pages)
 
