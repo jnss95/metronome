@@ -15,14 +15,17 @@ interface BpmControlsProps {
   onBpmChange: (bpm: number) => void;
   onIncrement: (amount: number) => void;
   onTapTempo: () => void;
+  isPlaying: boolean;
+  onPlayToggle: () => void;
 }
 
 /**
  * BPM controls component with:
  * - Large BPM display with manual input
- * - +/- 1 and +/- 5 buttons
+ * - +/- buttons on left and right of BPM display
  * - Slider for quick adjustment
  * - Tap tempo button
+ * - Play/Pause button
  */
 export function BpmControls({
   bpm,
@@ -31,6 +34,8 @@ export function BpmControls({
   onBpmChange,
   onIncrement,
   onTapTempo,
+  isPlaying,
+  onPlayToggle,
 }: BpmControlsProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(bpm.toString());
@@ -54,57 +59,74 @@ export function BpmControls({
 
   return (
     <View style={styles.container}>
-      {/* BPM Display */}
-      <View style={styles.bpmDisplay}>
-        {isEditing ? (
-          <TextInput
-            style={styles.bpmInput}
-            value={inputValue}
-            onChangeText={setInputValue}
-            onBlur={handleInputBlur}
-            onSubmitEditing={handleInputSubmit}
-            keyboardType="numeric"
-            autoFocus
-            selectTextOnFocus
-            maxLength={3}
-          />
-        ) : (
-          <Pressable onPress={() => {
-            setInputValue(bpm.toString());
-            setIsEditing(true);
-          }}>
-            <Text style={styles.bpmText}>{bpm}</Text>
+      {/* BPM Display with +/- buttons on sides */}
+      <View style={styles.bpmRow}>
+        {/* Left side buttons */}
+        <View style={styles.sideButtons}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              styles.buttonSmall,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={() => onIncrement(-5)}
+          >
+            <Text style={styles.buttonText}>-5</Text>
           </Pressable>
-        )}
-        <Text style={styles.bpmLabel}>BPM</Text>
-      </View>
+          <Pressable
+            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+            onPress={() => onIncrement(-1)}
+          >
+            <Text style={styles.buttonText}>−</Text>
+          </Pressable>
+        </View>
 
-      {/* +/- Buttons */}
-      <View style={styles.buttonsRow}>
-        <Pressable
-          style={({ pressed }) => [styles.button, styles.buttonSmall, pressed && styles.buttonPressed]}
-          onPress={() => onIncrement(-5)}
-        >
-          <Text style={styles.buttonText}>-5</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-          onPress={() => onIncrement(-1)}
-        >
-          <Text style={styles.buttonText}>−</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-          onPress={() => onIncrement(1)}
-        >
-          <Text style={styles.buttonText}>+</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.button, styles.buttonSmall, pressed && styles.buttonPressed]}
-          onPress={() => onIncrement(5)}
-        >
-          <Text style={styles.buttonText}>+5</Text>
-        </Pressable>
+        {/* BPM Display */}
+        <View style={styles.bpmDisplay}>
+          {isEditing ? (
+            <TextInput
+              style={styles.bpmInput}
+              value={inputValue}
+              onChangeText={setInputValue}
+              onBlur={handleInputBlur}
+              onSubmitEditing={handleInputSubmit}
+              keyboardType="numeric"
+              autoFocus
+              selectTextOnFocus
+              maxLength={3}
+            />
+          ) : (
+            <Pressable
+              onPress={() => {
+                setInputValue(bpm.toString());
+                setIsEditing(true);
+              }}
+            >
+              <Text style={styles.bpmText}>{bpm}</Text>
+            </Pressable>
+          )}
+          <Text style={styles.bpmLabel}>BPM</Text>
+        </View>
+
+        {/* Right side buttons */}
+        <View style={styles.sideButtons}>
+          <Pressable
+            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+            onPress={() => onIncrement(1)}
+          >
+            <Text style={styles.buttonText}>+</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              styles.buttonSmall,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={() => onIncrement(5)}
+          >
+            <Text style={styles.buttonText}>+5</Text>
+          </Pressable>
+        </View>
       </View>
 
       {/* Slider (Web only for now) */}
@@ -130,6 +152,30 @@ export function BpmControls({
       >
         <Text style={styles.tapButtonText}>TAP TEMPO</Text>
       </Pressable>
+
+      {/* Play/Pause Button */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.playButton,
+          isPlaying && styles.playButtonPlaying,
+          pressed && styles.playButtonPressed,
+        ]}
+        onPress={onPlayToggle}
+      >
+        <View style={styles.playIconContainer}>
+          {isPlaying ? (
+            <View style={styles.pauseIcon}>
+              <View style={styles.pauseBar} />
+              <View style={styles.pauseBar} />
+            </View>
+          ) : (
+            <View style={styles.playIcon} />
+          )}
+        </View>
+        <Text style={[styles.playLabel, isPlaying && styles.playLabelPlaying]}>
+          {isPlaying ? 'PAUSE' : 'PLAY'}
+        </Text>
+      </Pressable>
     </View>
   );
 }
@@ -152,8 +198,19 @@ const styles = StyleSheet.create({
     gap: 20,
     paddingVertical: 16,
   },
+  bpmRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  sideButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
   bpmDisplay: {
     alignItems: 'center',
+    minWidth: 140,
   },
   bpmText: {
     fontSize: 72,
@@ -177,21 +234,17 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     marginTop: -8,
   },
-  buttonsRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
   button: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: colors.surfaceVariant,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonSmall: {
-    width: 48,
-    height: 48,
+    width: 42,
+    height: 42,
     borderRadius: 12,
   },
   buttonPressed: {
@@ -199,7 +252,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.95 }],
   },
   buttonText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '500',
     color: colors.onSurface,
   },
@@ -221,18 +274,71 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 28,
-    backgroundColor: colors.primaryContainer,
-    marginTop: 8,
+    backgroundColor: colors.surfaceVariant,
   },
   tapButtonPressed: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryContainer,
     transform: [{ scale: 0.98 }],
   },
   tapButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.primary,
+    color: colors.onSurfaceVariant,
     letterSpacing: 1.5,
+  },
+  playButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingVertical: 20,
+    paddingHorizontal: 48,
+    borderRadius: 28,
+    backgroundColor: colors.primaryContainer,
+    minWidth: 200,
+  },
+  playButtonPlaying: {
+    backgroundColor: '#633B48',
+  },
+  playButtonPressed: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.9,
+  },
+  playIconContainer: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playIcon: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 20,
+    borderTopWidth: 12,
+    borderBottomWidth: 12,
+    borderLeftColor: '#EADDFF',
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    marginLeft: 4,
+  },
+  pauseIcon: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  pauseBar: {
+    width: 8,
+    height: 24,
+    backgroundColor: '#FFD8E4',
+    borderRadius: 2,
+  },
+  playLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#EADDFF',
+    letterSpacing: 2,
+  },
+  playLabelPlaying: {
+    color: '#FFD8E4',
   },
 });
 

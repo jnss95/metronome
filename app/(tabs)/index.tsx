@@ -1,7 +1,6 @@
 import {
   BeatVisualizer,
   BpmControls,
-  PlayButton,
   SubdivisionSelector,
   TimeSignatureSelector,
   VolumeControl,
@@ -48,12 +47,7 @@ export default function HomeScreen() {
           isPlaying={metronome.isPlaying}
         />
 
-        {/* Play/Pause Button */}
-        <View style={styles.playButtonContainer}>
-          <PlayButton isPlaying={metronome.isPlaying} onPress={metronome.toggle} />
-        </View>
-
-        {/* BPM Controls */}
+        {/* BPM Controls (includes Play button) */}
         <BpmControls
           bpm={metronome.bpm}
           minBpm={metronome.minBpm}
@@ -61,6 +55,8 @@ export default function HomeScreen() {
           onBpmChange={metronome.setBpm}
           onIncrement={metronome.incrementBpm}
           onTapTempo={metronome.tapTempo}
+          isPlaying={metronome.isPlaying}
+          onPlayToggle={metronome.toggle}
         />
 
         {/* Settings Section */}
@@ -106,9 +102,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     paddingHorizontal: 20,
     gap: 24,
-  },
-  playButtonContainer: {
-    marginVertical: 16,
   },
   settingsSection: {
     width: '100%',
