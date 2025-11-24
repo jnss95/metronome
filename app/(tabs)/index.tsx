@@ -1,16 +1,21 @@
 import {
   BeatVisualizer,
   BpmControls,
+  SettingButton,
+  SettingModal,
   SubdivisionSelector,
+  SUBDIVISION_LABELS,
   TimeSignatureSelector,
   VolumeControl,
 } from '@/components';
 import { useMetronome } from '@/hooks';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 export default function HomeScreen() {
   const metronome = useMetronome();
+  const [timeSignatureModalVisible, setTimeSignatureModalVisible] = useState(false);
+  const [subdivisionModalVisible, setSubdivisionModalVisible] = useState(false);
 
   // Keyboard shortcuts (Web only)
   const handleKeyDown = useCallback(
@@ -30,6 +35,9 @@ export default function HomeScreen() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  const timeSignatureDisplay = `${metronome.timeSignature.beats}/${metronome.timeSignature.noteValue}`;
+  const subdivisionDisplay = SUBDIVISION_LABELS[metronome.subdivision];
 
   return (
     <View style={styles.container}>
@@ -59,24 +67,54 @@ export default function HomeScreen() {
           onPlayToggle={metronome.toggle}
         />
 
-        {/* Settings Section */}
-        <View style={styles.settingsSection}>
-          <TimeSignatureSelector
-            timeSignature={metronome.timeSignature}
-            onTimeSignatureChange={metronome.setTimeSignature}
+        {/* Settings Buttons */}
+        <View style={styles.settingsRow}>
+          <SettingButton
+            label="Time"
+            value={timeSignatureDisplay}
+            onPress={() => setTimeSignatureModalVisible(true)}
           />
-
-          <SubdivisionSelector
-            subdivision={metronome.subdivision}
-            onSubdivisionChange={metronome.setSubdivision}
+          <SettingButton
+            label="Subdivision"
+            value={subdivisionDisplay}
+            onPress={() => setSubdivisionModalVisible(true)}
           />
+        </View>
 
+        {/* Volume Control */}
+        <View style={styles.volumeSection}>
           <VolumeControl
             volume={metronome.volume}
             onVolumeChange={metronome.setVolume}
           />
         </View>
       </ScrollView>
+
+      {/* Time Signature Modal */}
+      <SettingModal
+        visible={timeSignatureModalVisible}
+        onClose={() => setTimeSignatureModalVisible(false)}
+        title="Time Signature"
+      >
+        <TimeSignatureSelector
+          timeSignature={metronome.timeSignature}
+          onTimeSignatureChange={metronome.setTimeSignature}
+          onClose={() => setTimeSignatureModalVisible(false)}
+        />
+      </SettingModal>
+
+      {/* Subdivision Modal */}
+      <SettingModal
+        visible={subdivisionModalVisible}
+        onClose={() => setSubdivisionModalVisible(false)}
+        title="Subdivision"
+      >
+        <SubdivisionSelector
+          subdivision={metronome.subdivision}
+          onSubdivisionChange={metronome.setSubdivision}
+          onClose={() => setSubdivisionModalVisible(false)}
+        />
+      </SettingModal>
     </View>
   );
 }
@@ -103,10 +141,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 24,
   },
-  settingsSection: {
+  settingsRow: {
+    flexDirection: 'row',
+    gap: 16,
     width: '100%',
-    maxWidth: 500,
-    gap: 32,
-    marginTop: 16,
+    maxWidth: 400,
+  },
+  volumeSection: {
+    width: '100%',
+    maxWidth: 400,
+    marginTop: 8,
   },
 });

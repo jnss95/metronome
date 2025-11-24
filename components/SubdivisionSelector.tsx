@@ -5,125 +5,115 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 interface SubdivisionSelectorProps {
   subdivision: SubdivisionType;
   onSubdivisionChange: (subdivision: SubdivisionType) => void;
+  onClose?: () => void;
 }
 
-const SUBDIVISION_OPTIONS: { value: SubdivisionType; label: string; description: string }[] = [
-  { value: 'none', label: '♩', description: 'Quarter' },
-  { value: 'eighth', label: '♫', description: '8th' },
-  { value: 'triplet', label: '♫³', description: 'Triplet' },
-  { value: 'sixteenth', label: '♬', description: '16th' },
+const SUBDIVISION_OPTIONS: {
+  value: SubdivisionType;
+  label: string;
+  description: string;
+}[] = [
+  { value: 'none', label: '♩', description: 'Quarter notes' },
+  { value: 'eighth', label: '♫', description: 'Eighth notes' },
+  { value: 'triplet', label: '♫³', description: 'Triplets' },
+  { value: 'sixteenth', label: '♬', description: 'Sixteenth notes' },
 ];
 
+// Short labels for the button display
+export const SUBDIVISION_LABELS: Record<SubdivisionType, string> = {
+  none: '♩',
+  eighth: '♫',
+  triplet: '♫³',
+  sixteenth: '♬',
+};
+
 /**
- * Subdivision selector component.
+ * Subdivision selector content for modal.
  * Options: None, Eighth notes, Triplets, Sixteenths
  */
 export function SubdivisionSelector({
   subdivision,
   onSubdivisionChange,
+  onClose,
 }: SubdivisionSelectorProps) {
+  const handleSelect = (value: SubdivisionType) => {
+    onSubdivisionChange(value);
+    onClose?.();
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Subdivision</Text>
-      <View style={styles.optionsRow}>
-        {SUBDIVISION_OPTIONS.map((option) => {
-          const isSelected = subdivision === option.value;
-          
-          return (
-            <Pressable
-              key={option.value}
-              style={({ pressed }) => [
-                styles.optionButton,
-                isSelected && styles.optionButtonSelected,
-                pressed && styles.optionButtonPressed,
-              ]}
-              onPress={() => onSubdivisionChange(option.value)}
+      {SUBDIVISION_OPTIONS.map((option) => {
+        const isSelected = subdivision === option.value;
+
+        return (
+          <Pressable
+            key={option.value}
+            style={({ pressed }) => [
+              styles.optionButton,
+              isSelected && styles.optionButtonSelected,
+              pressed && styles.optionButtonPressed,
+            ]}
+            onPress={() => handleSelect(option.value)}
+          >
+            <Text
+              style={[styles.optionSymbol, isSelected && styles.optionSymbolSelected]}
             >
-              <Text
-                style={[
-                  styles.optionSymbol,
-                  isSelected && styles.optionSymbolSelected,
-                ]}
-              >
-                {option.label}
-              </Text>
-              <Text
-                style={[
-                  styles.optionLabel,
-                  isSelected && styles.optionLabelSelected,
-                ]}
-              >
-                {option.description}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+              {option.label}
+            </Text>
+            <Text
+              style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}
+            >
+              {option.description}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
 
 // Material Design 3 colors
 const colors = {
-  surface: '#1C1B1F',
   surfaceVariant: '#49454F',
-  onSurface: '#E6E1E5',
   onSurfaceVariant: '#CAC4D0',
-  primary: '#D0BCFF',
   primaryContainer: '#4F378B',
   onPrimaryContainer: '#EADDFF',
-  secondary: '#CCC2DC',
-  secondaryContainer: '#4A4458',
-  outline: '#938F99',
 };
 
 const styles = StyleSheet.create({
   container: {
-    gap: 12,
-    userSelect: 'none',
-  } as any,
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.onSurfaceVariant,
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  optionsRow: {
-    flexDirection: 'row',
-    gap: 12,
+    gap: 8,
   },
   optionButton: {
-    flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: colors.surfaceVariant,
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    gap: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    backgroundColor: colors.surfaceVariant,
   },
   optionButtonSelected: {
-    backgroundColor: colors.secondaryContainer,
-    borderColor: colors.secondary,
+    backgroundColor: colors.primaryContainer,
   },
   optionButtonPressed: {
-    transform: [{ scale: 0.98 }],
+    opacity: 0.8,
   },
   optionSymbol: {
-    fontSize: 24,
+    fontSize: 28,
     color: colors.onSurfaceVariant,
+    width: 40,
+    textAlign: 'center',
   },
   optionSymbolSelected: {
-    color: colors.secondary,
+    color: colors.onPrimaryContainer,
   },
   optionLabel: {
-    fontSize: 11,
+    fontSize: 16,
     color: colors.onSurfaceVariant,
-    letterSpacing: 0.3,
   },
   optionLabelSelected: {
-    color: colors.secondary,
+    color: colors.onPrimaryContainer,
   },
 });

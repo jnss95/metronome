@@ -1,109 +1,91 @@
 import { TIME_SIGNATURE_PRESETS, TimeSignature } from '@/hooks';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface TimeSignatureSelectorProps {
   timeSignature: TimeSignature;
   onTimeSignatureChange: (ts: TimeSignature) => void;
+  onClose?: () => void;
 }
 
 /**
- * Time signature selector with presets.
+ * Time signature selector content for modal.
  * Presets: 2/4, 3/4, 4/4, 5/4, 6/8, 7/8
  */
 export function TimeSignatureSelector({
   timeSignature,
   onTimeSignatureChange,
+  onClose,
 }: TimeSignatureSelectorProps) {
   const formatTimeSignature = (ts: TimeSignature) => `${ts.beats}/${ts.noteValue}`;
 
   const isSelected = (ts: TimeSignature) =>
     ts.beats === timeSignature.beats && ts.noteValue === timeSignature.noteValue;
 
+  const handleSelect = (ts: TimeSignature) => {
+    onTimeSignatureChange(ts);
+    onClose?.();
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Time Signature</Text>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.presetsRow}
-      >
-        {TIME_SIGNATURE_PRESETS.map((ts) => (
-          <Pressable
-            key={formatTimeSignature(ts)}
-            style={({ pressed }) => [
-              styles.presetButton,
-              isSelected(ts) && styles.presetButtonSelected,
-              pressed && styles.presetButtonPressed,
+      {TIME_SIGNATURE_PRESETS.map((ts) => (
+        <Pressable
+          key={formatTimeSignature(ts)}
+          style={({ pressed }) => [
+            styles.optionButton,
+            isSelected(ts) && styles.optionButtonSelected,
+            pressed && styles.optionButtonPressed,
+          ]}
+          onPress={() => handleSelect(ts)}
+        >
+          <Text
+            style={[
+              styles.optionText,
+              isSelected(ts) && styles.optionTextSelected,
             ]}
-            onPress={() => onTimeSignatureChange(ts)}
           >
-            <Text
-              style={[
-                styles.presetButtonText,
-                isSelected(ts) && styles.presetButtonTextSelected,
-              ]}
-            >
-              {formatTimeSignature(ts)}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+            {formatTimeSignature(ts)}
+          </Text>
+        </Pressable>
+      ))}
     </View>
   );
 }
 
 // Material Design 3 colors
 const colors = {
-  surface: '#1C1B1F',
   surfaceVariant: '#49454F',
   onSurface: '#E6E1E5',
   onSurfaceVariant: '#CAC4D0',
   primary: '#D0BCFF',
   primaryContainer: '#4F378B',
   onPrimaryContainer: '#EADDFF',
-  outline: '#938F99',
 };
 
 const styles = StyleSheet.create({
   container: {
-    gap: 12,
-    userSelect: 'none',
-  } as any,
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.onSurfaceVariant,
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  presetsRow: {
-    flexDirection: 'row',
     gap: 8,
-    paddingVertical: 4,
   },
-  presetButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 20,
+  optionButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
     backgroundColor: colors.surfaceVariant,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    alignItems: 'center',
   },
-  presetButtonSelected: {
+  optionButtonSelected: {
     backgroundColor: colors.primaryContainer,
-    borderColor: colors.primary,
   },
-  presetButtonPressed: {
-    transform: [{ scale: 0.95 }],
+  optionButtonPressed: {
+    opacity: 0.8,
   },
-  presetButtonText: {
-    fontSize: 18,
+  optionText: {
+    fontSize: 22,
     fontWeight: '600',
     color: colors.onSurfaceVariant,
   },
-  presetButtonTextSelected: {
+  optionTextSelected: {
     color: colors.onPrimaryContainer,
   },
 });
