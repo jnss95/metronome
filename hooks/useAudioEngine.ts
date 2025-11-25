@@ -8,16 +8,51 @@ interface AudioEngineOptions {
 }
 
 /**
+ * Detect iOS Safari to apply silent mode workaround
+ */
+function isIOSSafari(): boolean {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isWebkit = /WebKit/.test(ua);
+  const isNotChrome = !/CriOS/.test(ua);
+  return isIOS && isWebkit && isNotChrome;
+}
+
+/**
+ * Create a silent HTML audio element to unlock audio on iOS Safari
+ * This workaround allows audio to play even when the ringer switch is on silent
+ */
+function createSilentAudioUnlocker(): HTMLAudioElement | null {
+  if (typeof document === 'undefined') return null;
+  
+  // Create a short silent audio as base64 data URI (tiny MP3)
+  const silentAudio = document.createElement('audio');
+  // Minimal silent MP3 (base64 encoded)
+  silentAudio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV////////////////////////////////////////////AAAAAExhdmM1OC4xMwAAAAAAAAAAAAAAACQAAAAAAAAAAQGwTRxelgAAAAAAAAAAAAAAAAD/4xjEAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxDsAAADSAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+  silentAudio.setAttribute('playsinline', 'true');
+  silentAudio.setAttribute('webkit-playsinline', 'true');
+  silentAudio.loop = true;
+  silentAudio.volume = 0.01; // Nearly silent but not zero
+  
+  return silentAudio;
+}
+
+/**
  * Web Audio API based audio engine for metronome clicks.
  * Synthesizes percussive click sounds with distinct tones for:
  * - Downbeat (accented first beat)
  * - Main beats (regular beats 2, 3, 4, etc.)
  * - Subdivisions (divisions between main beats)
+ * 
+ * Includes iOS Safari silent mode workaround.
  */
 export function useAudioEngine(options: AudioEngineOptions = {}) {
   const { volume = 0.7 } = options;
   const audioContextRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
+  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const isUnlockedRef = useRef(false);
 
   // Initialize audio context
   const initAudioContext = useCallback(() => {
@@ -29,11 +64,27 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
       gainNodeRef.current = audioContextRef.current.createGain();
       gainNodeRef.current.connect(audioContextRef.current.destination);
       gainNodeRef.current.gain.value = volume;
+      
+      // iOS Safari silent mode workaround:
+      // Playing an HTML audio element alongside WebAudio makes audio
+      // play through the "media" channel instead of "ringer" channel
+      if (isIOSSafari() && !silentAudioRef.current) {
+        silentAudioRef.current = createSilentAudioUnlocker();
+      }
     }
 
     // Resume if suspended (browser autoplay policy)
     if (audioContextRef.current.state === 'suspended') {
       audioContextRef.current.resume();
+    }
+    
+    // Start the silent audio on iOS Safari (must be triggered by user interaction)
+    if (isIOSSafari() && silentAudioRef.current && !isUnlockedRef.current) {
+      silentAudioRef.current.play().then(() => {
+        isUnlockedRef.current = true;
+      }).catch(() => {
+        // Will retry on next user interaction
+      });
     }
 
     return audioContextRef.current;
@@ -53,6 +104,11 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
         audioContextRef.current.close();
         audioContextRef.current = null;
       }
+      if (silentAudioRef.current) {
+        silentAudioRef.current.pause();
+        silentAudioRef.current = null;
+      }
+      isUnlockedRef.current = false;
     };
   }, []);
 
