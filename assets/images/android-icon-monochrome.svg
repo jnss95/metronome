@@ -1,0 +1,14 @@
+<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" fill="transparent"/>
+  
+  <g transform="translate(512, 512)">
+    <!-- Metronome body -->
+    <path d="M -153.6 256 L -256 -256 L 256 -256 L 153.6 256 Z" 
+          fill="#FFFFFF" stroke="#FFFFFF" stroke-width="2"/>
+    <!-- Pendulum -->
+    <line x1="0" y1="-204.8" x2="81.92" y2="204.8" 
+          stroke="#E0E0E0" stroke-width="20.48"/>
+    <circle cx="81.92" cy="204.8" r="40.96" fill="#E0E0E0"/>
+  </g>
+  
+</svg>

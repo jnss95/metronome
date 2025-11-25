@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
+import { Audio } from 'expo-av';
 
 type SoundType = 'downbeat' | 'beat' | 'subdivision';
 
@@ -39,8 +40,11 @@ function createSilentAudioUnlocker(): HTMLAudioElement | null {
 }
 
 /**
- * Web Audio API based audio engine for metronome clicks.
- * Synthesizes percussive click sounds with distinct tones for:
+ * Cross-platform audio engine for metronome clicks.
+ * - Web: Uses Web Audio API to synthesize percussive click sounds
+ * - Mobile: Uses expo-av to play pre-generated click sounds
+ * 
+ * Provides distinct tones for:
  * - Downbeat (accented first beat)
  * - Main beats (regular beats 2, 3, 4, etc.)
  * - Subdivisions (divisions between main beats)
@@ -53,8 +57,9 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
   const gainNodeRef = useRef<GainNode | null>(null);
   const silentAudioRef = useRef<HTMLAudioElement | null>(null);
   const isUnlockedRef = useRef(false);
+  const soundObjectsRef = useRef<{ [key in SoundType]?: Audio.Sound }>({});
 
-  // Initialize audio context
+  // Initialize audio context (Web only)
   const initAudioContext = useCallback(() => {
     if (Platform.OS !== 'web') return null;
 
@@ -90,12 +95,62 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
     return audioContextRef.current;
   }, [volume]);
 
-  // Update volume
-  useEffect(() => {
-    if (gainNodeRef.current) {
-      gainNodeRef.current.gain.value = volume;
+  // Initialize mobile audio (iOS/Android)
+  const initMobileAudio = useCallback(async () => {
+    if (Platform.OS === 'web') return;
+
+    try {
+      // Configure audio mode for playback
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+
+      // Create sound objects for each type (using synthesized buffers)
+      const types: SoundType[] = ['downbeat', 'beat', 'subdivision'];
+      
+      for (const type of types) {
+        if (!soundObjectsRef.current[type]) {
+          const { sound } = await Audio.Sound.createAsync(
+            // We'll use a data URI with synthesized audio
+            { uri: generateClickDataURI(type) },
+            { volume, shouldPlay: false }
+          );
+          soundObjectsRef.current[type] = sound;
+        }
+      }
+    } catch (error) {
+      console.error('Failed to initialize mobile audio:', error);
     }
   }, [volume]);
+
+  // Update volume for both web and mobile
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      if (gainNodeRef.current) {
+        gainNodeRef.current.gain.value = volume;
+      }
+    } else {
+      // Update volume for all mobile sound objects
+      Object.values(soundObjectsRef.current).forEach(async (sound) => {
+        if (sound) {
+          try {
+            await sound.setVolumeAsync(volume);
+          } catch (error) {
+            console.error('Failed to set volume:', error);
+          }
+        }
+      });
+    }
+  }, [volume]);
+
+  // Initialize mobile audio on mount
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      initMobileAudio();
+    }
+  }, [initMobileAudio]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -109,14 +164,25 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
         silentAudioRef.current = null;
       }
       isUnlockedRef.current = false;
+      // Unload mobile sounds
+      Object.values(soundObjectsRef.current).forEach(async (sound) => {
+        if (sound) {
+          try {
+            await sound.unloadAsync();
+          } catch (error) {
+            console.error('Failed to unload sound:', error);
+          }
+        }
+      });
+      soundObjectsRef.current = {};
     };
   }, []);
 
   /**
-   * Synthesize a percussive click sound
+   * Synthesize a percussive click sound (Web only)
    * Uses a combination of oscillators and noise for a crisp click
    */
-  const playClick = useCallback(
+  const playClickWeb = useCallback(
     (type: SoundType, time?: number) => {
       const ctx = initAudioContext();
       if (!ctx || !gainNodeRef.current) return;
@@ -179,29 +245,76 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
   );
 
   /**
-   * Schedule a click at a specific time (for precise timing)
+   * Play click sound on mobile (iOS/Android)
+   */
+  const playClickMobile = useCallback(
+    async (type: SoundType) => {
+      const sound = soundObjectsRef.current[type];
+      if (!sound) return;
+
+      try {
+        // Replay from beginning
+        await sound.setPositionAsync(0);
+        await sound.playAsync();
+      } catch (error) {
+        console.error('Failed to play mobile click:', error);
+      }
+    },
+    []
+  );
+
+  /**
+   * Play click sound (platform-agnostic)
+   */
+  const playClick = useCallback(
+    (type: SoundType, time?: number) => {
+      if (Platform.OS === 'web') {
+        playClickWeb(type, time);
+      } else {
+        // On mobile, ignore time parameter (scheduling not supported with expo-av)
+        playClickMobile(type);
+      }
+    },
+    [playClickWeb, playClickMobile]
+  );
+
+  /**
+   * Schedule a click at a specific time (Web only - for precise timing)
    */
   const scheduleClick = useCallback(
     (type: SoundType, time: number) => {
-      playClick(type, time);
+      if (Platform.OS === 'web') {
+        playClickWeb(type, time);
+      } else {
+        // On mobile, just play immediately (scheduling not supported)
+        playClickMobile(type);
+      }
     },
-    [playClick]
+    [playClickWeb, playClickMobile]
   );
 
   /**
    * Get the current audio context time (for scheduling)
    */
   const getCurrentTime = useCallback(() => {
-    const ctx = initAudioContext();
-    return ctx?.currentTime ?? 0;
+    if (Platform.OS === 'web') {
+      const ctx = initAudioContext();
+      return ctx?.currentTime ?? 0;
+    }
+    // On mobile, return performance.now() in seconds
+    return performance.now() / 1000;
   }, [initAudioContext]);
 
   /**
    * Resume audio context (call on user interaction)
    */
   const resume = useCallback(() => {
-    initAudioContext();
-  }, [initAudioContext]);
+    if (Platform.OS === 'web') {
+      initAudioContext();
+    } else {
+      initMobileAudio();
+    }
+  }, [initAudioContext, initMobileAudio]);
 
   return {
     playClick,
@@ -209,4 +322,59 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
     getCurrentTime,
     resume,
   };
+}
+
+/**
+ * Generate a data URI for a synthesized click sound (for mobile)
+ * Creates a simple WAV file with a sine wave click
+ */
+function generateClickDataURI(type: SoundType): string {
+  const params = {
+    downbeat: { frequency: 1000, duration: 0.05, gain: 1.0 },
+    beat: { frequency: 800, duration: 0.04, gain: 0.7 },
+    subdivision: { frequency: 600, duration: 0.03, gain: 0.4 },
+  }[type];
+
+  const sampleRate = 44100;
+  const numSamples = Math.floor(sampleRate * params.duration);
+  const buffer = new ArrayBuffer(44 + numSamples * 2);
+  const view = new DataView(buffer);
+
+  // WAV header
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + numSamples * 2, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, 1, true); // Mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(view, 36, 'data');
+  view.setUint32(40, numSamples * 2, true);
+
+  // Generate sine wave with envelope
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+    const envelope = Math.max(0, 1 - t / params.duration);
+    const sample = Math.sin(2 * Math.PI * params.frequency * t) * envelope * params.gain;
+    view.setInt16(44 + i * 2, sample * 32767, true);
+  }
+
+  // Convert to base64
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  const base64 = btoa(binary);
+  return \`data:audio/wav;base64,\${base64}\`;
+}
+
+function writeString(view: DataView, offset: number, string: string) {
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
 }

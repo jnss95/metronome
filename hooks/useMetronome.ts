@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useAudioEngine } from './useAudioEngine';
 
 export type TimeSignature = {
@@ -156,6 +158,18 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
 
       // Schedule the sound
       audioEngine.scheduleClick(soundType, nextNoteTimeRef.current);
+
+      // Add haptic feedback on mobile for main beats
+      if (Platform.OS !== 'web' && currentSubdivisionRef.current === 0) {
+        // Use different haptic intensities for different beat types
+        if (currentBeatRef.current === 0) {
+          // Downbeat - stronger haptic
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        } else {
+          // Regular beat - lighter haptic
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      }
 
       // Update visual state
       const beatToSet = currentBeatRef.current;

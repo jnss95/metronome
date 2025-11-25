@@ -6,7 +6,8 @@ A cross-platform metronome app built with Expo and React Native, targeting iOS, 
 
 ## Features
 
-- **Precise Audio Engine** – Synthesized percussive click sounds with distinct tones for downbeats, main beats, and subdivisions
+- **Precise Audio Engine** – Cross-platform audio with Web Audio API (web) and expo-av (mobile)
+- **Haptic Feedback** – Tactile feedback on Android/iOS for beats (heavy for downbeat, light for regular beats)
 - **Time Signatures** – Support for 2/4, 3/4, 4/4, 5/4, 6/8, and 7/8
 - **Subdivisions** – None, eighth notes, triplets, or sixteenth notes
 - **Flexible BPM Control** – Tap tempo, ±1 buttons, slider, and manual input (20–300 BPM)
@@ -15,6 +16,7 @@ A cross-platform metronome app built with Expo and React Native, targeting iOS, 
 - **Dark/Light Mode** – Automatic system theme detection
 - **Offline Support** – Works without an internet connection
 - **Settings Persistence** – Your preferences are saved between sessions
+- **Android Optimized** – Edge-to-edge display, adaptive icons, and Material Design 3
 
 ## Getting Started
 
@@ -59,8 +61,22 @@ npm run build:web
 - **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (file-based)
 - **Animations**: [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
 - **Haptics**: [Expo Haptics](https://docs.expo.dev/versions/latest/sdk/haptics/)
-- **Audio**: Web Audio API
+- **Audio**: Web Audio API (web) / [Expo AV](https://docs.expo.dev/versions/latest/sdk/av/) (mobile)
+- **Storage**: [Async Storage](https://react-native-async-storage.github.io/async-storage/)
 - **Deployment**: GitHub Actions → GitHub Pages
+
+## Android Compatibility
+
+Full Android support with:
+- ✅ Cross-platform audio engine (expo-av)
+- ✅ Haptic feedback for beats
+- ✅ Material Design 3 styling
+- ✅ Edge-to-edge display
+- ✅ Adaptive icons
+- ✅ Settings persistence
+- ✅ Offline functionality
+
+See [ANDROID.md](./ANDROID.md) for detailed Android compatibility guide.
 
 ## Project Structure
 
