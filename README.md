@@ -105,6 +105,7 @@ hooks/
 3. Run linting before committing (`npm run lint`)
 4. Commit with conventional commits (`git commit -m 'feat: add amazing feature'`)
 5. Push to the branch (`git push origin feat/amazing-feature`)
+   - **Note**: A pre-push hook automatically runs `npm run build:web` to ensure the web build succeeds before pushing
 6. Open a Pull Request
 
 ## License

@@ -22,6 +22,8 @@ After the lint command succeeds (and any issues are fixed), every finished task 
 
 If `package.json` or lockfiles changed, ensure dependencies are installed and no lint errors remain before committing. Never push with unresolved lint errors.
 
+**Note**: A pre-push Git hook is configured to automatically run `npm run build:web` before every push. This ensures the web build succeeds before code is pushed to the repository. If the build fails, the push will be blocked until the issues are resolved.
+
 
 # Metronome App - Project Plan
 
