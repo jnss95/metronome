@@ -1,6 +1,6 @@
+import { Audio } from 'expo-av';
 import { useCallback, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
-import { Audio } from 'expo-av';
 
 type SoundType = 'downbeat' | 'beat' | 'subdivision';
 
@@ -370,7 +370,7 @@ function generateClickDataURI(type: SoundType): string {
     binary += String.fromCharCode(bytes[i]);
   }
   const base64 = btoa(binary);
-  return \`data:audio/wav;base64,\${base64}\`;
+  return `data:audio/wav;base64,${base64}`;
 }
 
 function writeString(view: DataView, offset: number, string: string) {
