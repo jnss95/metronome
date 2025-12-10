@@ -5,4 +5,3 @@ export { SettingModal } from './SettingModal';
 export { SUBDIVISION_LABELS, SubdivisionSelector } from './SubdivisionSelector';
 export { TimeSignatureSelector } from './TimeSignatureSelector';
 export { VolumeControl } from './VolumeControl';
-

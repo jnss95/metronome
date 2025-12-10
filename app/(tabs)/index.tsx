@@ -10,7 +10,13 @@ import {
 } from '@/components';
 import { useMetronome, useSettingsPersistence } from '@/hooks';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 
 // Inner component that only renders after settings are loaded
 function MetronomeContent({
@@ -28,7 +34,8 @@ function MetronomeContent({
     onSettingsChange: updateSettings,
   });
 
-  const [timeSignatureModalVisible, setTimeSignatureModalVisible] = useState(false);
+  const [timeSignatureModalVisible, setTimeSignatureModalVisible] =
+    useState(false);
   const [subdivisionModalVisible, setSubdivisionModalVisible] = useState(false);
 
   // Keyboard shortcuts (Web only)
@@ -146,7 +153,9 @@ export default function HomeScreen() {
   }
 
   // Only render metronome after settings are loaded to ensure correct initial values
-  return <MetronomeContent settings={settings} updateSettings={updateSettings} />;
+  return (
+    <MetronomeContent settings={settings} updateSettings={updateSettings} />
+  );
 }
 
 // Material Design 3 colors

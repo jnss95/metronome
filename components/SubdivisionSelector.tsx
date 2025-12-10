@@ -43,7 +43,7 @@ export function SubdivisionSelector({
 
   return (
     <View style={styles.container}>
-      {SUBDIVISION_OPTIONS.map((option) => {
+      {SUBDIVISION_OPTIONS.map(option => {
         const isSelected = subdivision === option.value;
 
         return (
@@ -57,12 +57,18 @@ export function SubdivisionSelector({
             onPress={() => handleSelect(option.value)}
           >
             <Text
-              style={[styles.optionSymbol, isSelected && styles.optionSymbolSelected]}
+              style={[
+                styles.optionSymbol,
+                isSelected && styles.optionSymbolSelected,
+              ]}
             >
               {option.label}
             </Text>
             <Text
-              style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}
+              style={[
+                styles.optionLabel,
+                isSelected && styles.optionLabelSelected,
+              ]}
             >
               {option.description}
             </Text>

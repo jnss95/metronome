@@ -17,10 +17,12 @@ export function TimeSignatureSelector({
   onTimeSignatureChange,
   onClose,
 }: TimeSignatureSelectorProps) {
-  const formatTimeSignature = (ts: TimeSignature) => `${ts.beats}/${ts.noteValue}`;
+  const formatTimeSignature = (ts: TimeSignature) =>
+    `${ts.beats}/${ts.noteValue}`;
 
   const isSelected = (ts: TimeSignature) =>
-    ts.beats === timeSignature.beats && ts.noteValue === timeSignature.noteValue;
+    ts.beats === timeSignature.beats &&
+    ts.noteValue === timeSignature.noteValue;
 
   const handleSelect = (ts: TimeSignature) => {
     onTimeSignatureChange(ts);
@@ -29,7 +31,7 @@ export function TimeSignatureSelector({
 
   return (
     <View style={styles.container}>
-      {TIME_SIGNATURE_PRESETS.map((ts) => (
+      {TIME_SIGNATURE_PRESETS.map(ts => (
         <Pressable
           key={formatTimeSignature(ts)}
           style={({ pressed }) => [

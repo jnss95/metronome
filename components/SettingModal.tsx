@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text
-} from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
 interface SettingModalProps {
   visible: boolean;
@@ -32,7 +26,10 @@ export function SettingModal({
       onRequestClose={onClose}
     >
       <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.modalContainer} onPress={(e) => e.stopPropagation()}>
+        <Pressable
+          style={styles.modalContainer}
+          onPress={e => e.stopPropagation()}
+        >
           <Text style={styles.title}>{title}</Text>
           <ScrollView
             style={styles.content}
@@ -42,7 +39,10 @@ export function SettingModal({
             {children}
           </ScrollView>
           <Pressable
-            style={({ pressed }) => [styles.closeButton, pressed && styles.closeButtonPressed]}
+            style={({ pressed }) => [
+              styles.closeButton,
+              pressed && styles.closeButtonPressed,
+            ]}
             onPress={onClose}
           >
             <Text style={styles.closeButtonText}>Done</Text>

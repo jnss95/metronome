@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.expo/
+.expo-shared/
+
+# Native
+android/
+ios/
+
+# Misc
+*.log
+.DS_Store
+coverage/

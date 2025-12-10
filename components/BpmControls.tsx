@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 
 interface BpmControlsProps {
@@ -63,7 +63,10 @@ export function BpmControls({
       <View style={styles.bpmRow}>
         {/* Left side button */}
         <Pressable
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
           onPress={() => onIncrement(-1)}
         >
           <Text style={styles.buttonText}>−</Text>
@@ -98,7 +101,10 @@ export function BpmControls({
 
         {/* Right side button */}
         <Pressable
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
           onPress={() => onIncrement(1)}
         >
           <Text style={styles.buttonText}>+</Text>
@@ -123,7 +129,10 @@ export function BpmControls({
 
       {/* Tap Tempo */}
       <Pressable
-        style={({ pressed }) => [styles.tapButton, pressed && styles.tapButtonPressed]}
+        style={({ pressed }) => [
+          styles.tapButton,
+          pressed && styles.tapButtonPressed,
+        ]}
         onPress={onTapTempo}
       >
         <Text style={styles.tapButtonText}>TAP TEMPO</Text>

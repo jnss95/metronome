@@ -75,19 +75,19 @@ const colors = {
   // Surface colors
   surface: '#1C1B1F',
   surfaceVariant: '#49454F',
-  
+
   // Primary colors
   primary: '#D0BCFF',
   primaryContainer: '#4F378B',
-  
+
   // Secondary colors
   secondary: '#CCC2DC',
   secondaryContainer: '#4A4458',
-  
+
   // Tertiary colors
   tertiary: '#EFB8C8',
   tertiaryContainer: '#633B48',
-  
+
   // Inactive/muted
   inactive: '#49454F',
   inactiveSubdivision: '#2D2A33',

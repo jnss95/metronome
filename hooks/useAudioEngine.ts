@@ -12,9 +12,12 @@ interface AudioEngineOptions {
  * Detect iOS Safari to apply silent mode workaround
  */
 function isIOSSafari(): boolean {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  if (typeof window === 'undefined' || typeof navigator === 'undefined')
+    return false;
   const ua = navigator.userAgent;
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isWebkit = /WebKit/.test(ua);
   const isNotChrome = !/CriOS/.test(ua);
   return isIOS && isWebkit && isNotChrome;
@@ -26,16 +29,17 @@ function isIOSSafari(): boolean {
  */
 function createSilentAudioUnlocker(): HTMLAudioElement | null {
   if (typeof document === 'undefined') return null;
-  
+
   // Create a short silent audio as base64 data URI (tiny MP3)
   const silentAudio = document.createElement('audio');
   // Minimal silent MP3 (base64 encoded)
-  silentAudio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV////////////////////////////////////////////AAAAAExhdmM1OC4xMwAAAAAAAAAAAAAAACQAAAAAAAAAAQGwTRxelgAAAAAAAAAAAAAAAAD/4xjEAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxDsAAADSAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+  silentAudio.src =
+    'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV////////////////////////////////////////////AAAAAExhdmM1OC4xMwAAAAAAAAAAAAAAACQAAAAAAAAAAQGwTRxelgAAAAAAAAAAAAAAAAD/4xjEAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxDsAAADSAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
   silentAudio.setAttribute('playsinline', 'true');
   silentAudio.setAttribute('webkit-playsinline', 'true');
   silentAudio.loop = true;
   silentAudio.volume = 0.01; // Nearly silent but not zero
-  
+
   return silentAudio;
 }
 
@@ -43,12 +47,12 @@ function createSilentAudioUnlocker(): HTMLAudioElement | null {
  * Cross-platform audio engine for metronome clicks.
  * - Web: Uses Web Audio API to synthesize percussive click sounds
  * - Mobile: Uses expo-av to play pre-generated click sounds
- * 
+ *
  * Provides distinct tones for:
  * - Downbeat (accented first beat)
  * - Main beats (regular beats 2, 3, 4, etc.)
  * - Subdivisions (divisions between main beats)
- * 
+ *
  * Includes iOS Safari silent mode workaround.
  */
 export function useAudioEngine(options: AudioEngineOptions = {}) {
@@ -64,12 +68,15 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
     if (Platform.OS !== 'web') return null;
 
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      audioContextRef.current = new (
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext
+      )();
       gainNodeRef.current = audioContextRef.current.createGain();
       gainNodeRef.current.connect(audioContextRef.current.destination);
       gainNodeRef.current.gain.value = volume;
-      
+
       // iOS Safari silent mode workaround:
       // Playing an HTML audio element alongside WebAudio makes audio
       // play through the "media" channel instead of "ringer" channel
@@ -82,14 +89,17 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
     if (audioContextRef.current.state === 'suspended') {
       audioContextRef.current.resume();
     }
-    
+
     // Start the silent audio on iOS Safari (must be triggered by user interaction)
     if (isIOSSafari() && silentAudioRef.current && !isUnlockedRef.current) {
-      silentAudioRef.current.play().then(() => {
-        isUnlockedRef.current = true;
-      }).catch(() => {
-        // Will retry on next user interaction
-      });
+      silentAudioRef.current
+        .play()
+        .then(() => {
+          isUnlockedRef.current = true;
+        })
+        .catch(() => {
+          // Will retry on next user interaction
+        });
     }
 
     return audioContextRef.current;
@@ -109,7 +119,7 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
 
       // Create sound objects for each type (using synthesized buffers)
       const types: SoundType[] = ['downbeat', 'beat', 'subdivision'];
-      
+
       for (const type of types) {
         if (!soundObjectsRef.current[type]) {
           const { sound } = await Audio.Sound.createAsync(
@@ -133,7 +143,7 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
       }
     } else {
       // Update volume for all mobile sound objects
-      Object.values(soundObjectsRef.current).forEach(async (sound) => {
+      Object.values(soundObjectsRef.current).forEach(async sound => {
         if (sound) {
           try {
             await sound.setVolumeAsync(volume);
@@ -165,7 +175,7 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
       }
       isUnlockedRef.current = false;
       // Unload mobile sounds
-      Object.values(soundObjectsRef.current).forEach(async (sound) => {
+      Object.values(soundObjectsRef.current).forEach(async sound => {
         if (sound) {
           try {
             await sound.unloadAsync();
@@ -217,7 +227,11 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
       oscillator.stop(now + params.duration + 0.01);
 
       // Add a bit of noise for attack (makes it more percussive)
-      const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.02, ctx.sampleRate);
+      const noiseBuffer = ctx.createBuffer(
+        1,
+        ctx.sampleRate * 0.02,
+        ctx.sampleRate
+      );
       const noiseData = noiseBuffer.getChannelData(0);
       for (let i = 0; i < noiseData.length; i++) {
         noiseData[i] = (Math.random() * 2 - 1) * 0.3;
@@ -247,21 +261,18 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
   /**
    * Play click sound on mobile (iOS/Android)
    */
-  const playClickMobile = useCallback(
-    async (type: SoundType) => {
-      const sound = soundObjectsRef.current[type];
-      if (!sound) return;
+  const playClickMobile = useCallback(async (type: SoundType) => {
+    const sound = soundObjectsRef.current[type];
+    if (!sound) return;
 
-      try {
-        // Replay from beginning
-        await sound.setPositionAsync(0);
-        await sound.playAsync();
-      } catch (error) {
-        console.error('Failed to play mobile click:', error);
-      }
-    },
-    []
-  );
+    try {
+      // Replay from beginning
+      await sound.setPositionAsync(0);
+      await sound.playAsync();
+    } catch (error) {
+      console.error('Failed to play mobile click:', error);
+    }
+  }, []);
 
   /**
    * Play click sound (platform-agnostic)
@@ -359,7 +370,8 @@ function generateClickDataURI(type: SoundType): string {
   for (let i = 0; i < numSamples; i++) {
     const t = i / sampleRate;
     const envelope = Math.max(0, 1 - t / params.duration);
-    const sample = Math.sin(2 * Math.PI * params.frequency * t) * envelope * params.gain;
+    const sample =
+      Math.sin(2 * Math.PI * params.frequency * t) * envelope * params.gain;
     view.setInt16(44 + i * 2, sample * 32767, true);
   }
 

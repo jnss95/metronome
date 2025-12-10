@@ -68,6 +68,7 @@ npm run build:web
 ## Android Compatibility
 
 Full Android support with:
+
 - ✅ Cross-platform audio engine (expo-av)
 - ✅ Haptic feedback for beats
 - ✅ Material Design 3 styling
@@ -143,4 +144,3 @@ The environment variable `PUBLIC_URL=/metronom` ensures all assets resolve corre
 ### 5. Manual deploy (optional)
 
 You can manually publish after building using any static hosting provider by serving the `dist/` directory.
-

@@ -67,8 +67,10 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
 
   // State
   const [bpm, setBpmState] = useState(initialBpm);
-  const [timeSignature, setTimeSignatureState] = useState<TimeSignature>(initialTimeSignature);
-  const [subdivision, setSubdivisionState] = useState<SubdivisionType>(initialSubdivision);
+  const [timeSignature, setTimeSignatureState] =
+    useState<TimeSignature>(initialTimeSignature);
+  const [subdivision, setSubdivisionState] =
+    useState<SubdivisionType>(initialSubdivision);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(0);
   const [currentSubdivision, setCurrentSubdivision] = useState(0);
@@ -280,7 +282,8 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
       for (let i = 1; i < tapTimesRef.current.length; i++) {
         intervals.push(tapTimesRef.current[i] - tapTimesRef.current[i - 1]);
       }
-      const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      const avgInterval =
+        intervals.reduce((a, b) => a + b, 0) / intervals.length;
       const calculatedBpm = Math.round(60000 / avgInterval);
       setBpm(calculatedBpm);
     }

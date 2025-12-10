@@ -9,8 +9,16 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "build:web": "PUBLIC_URL=/metronome expo export --platform web --output-dir dist",
     "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -45,7 +53,10 @@
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
     "sharp": "^0.34.5",
     "typescript": "~5.9.2"
   },

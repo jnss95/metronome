@@ -76,7 +76,7 @@ export function useSettingsPersistence() {
   // Update a single setting
   const updateSettings = useCallback(
     (updates: Partial<PersistedSettings>) => {
-      setSettings((prev) => {
+      setSettings(prev => {
         if (!prev) return prev;
         const newSettings = { ...prev, ...updates };
         saveSettings(newSettings);
