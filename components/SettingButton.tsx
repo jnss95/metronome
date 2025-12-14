@@ -34,7 +34,7 @@ const colors = {
 const styles = StyleSheet.create({
   button: {
     flex: 1,
-    minWidth: 140,
+    minWidth: 120,
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 16,

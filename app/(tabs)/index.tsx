@@ -2,6 +2,7 @@ import {
   BeatVisualizer,
   BpmControls,
   MUTE_EVERY_LABELS,
+  MuteEverySelector,
   SettingButton,
   SettingModal,
   SUBDIVISION_LABELS,
@@ -39,6 +40,7 @@ function MetronomeContent({
   const [timeSignatureModalVisible, setTimeSignatureModalVisible] =
     useState(false);
   const [subdivisionModalVisible, setSubdivisionModalVisible] = useState(false);
+  const [muteModalVisible, setMuteModalVisible] = useState(false);
 
   // Keyboard shortcuts (Web only)
   const handleKeyDown = useCallback(
@@ -62,10 +64,6 @@ function MetronomeContent({
   const timeSignatureDisplay = `${metronome.timeSignature.beats}/${metronome.timeSignature.noteValue}`;
   const subdivisionDisplay = SUBDIVISION_LABELS[metronome.subdivision];
   const muteEveryDisplay = MUTE_EVERY_LABELS[metronome.muteEvery];
-  const subdivisionButtonValue =
-    metronome.muteEvery === 0
-      ? subdivisionDisplay
-      : `${subdivisionDisplay} · ${muteEveryDisplay}`;
 
   return (
     <View style={styles.container}>
@@ -104,8 +102,13 @@ function MetronomeContent({
           />
           <SettingButton
             label="Subdivision"
-            value={subdivisionButtonValue}
+            value={subdivisionDisplay}
             onPress={() => setSubdivisionModalVisible(true)}
+          />
+          <SettingButton
+            label="Mute every"
+            value={muteEveryDisplay}
+            onPress={() => setMuteModalVisible(true)}
           />
         </View>
 
@@ -139,10 +142,21 @@ function MetronomeContent({
       >
         <SubdivisionSelector
           subdivision={metronome.subdivision}
-          muteEvery={metronome.muteEvery}
           onSubdivisionChange={metronome.setSubdivision}
-          onMuteEveryChange={metronome.setMuteEvery}
           onClose={() => setSubdivisionModalVisible(false)}
+        />
+      </SettingModal>
+
+      {/* Mute every Modal */}
+      <SettingModal
+        visible={muteModalVisible}
+        onClose={() => setMuteModalVisible(false)}
+        title="Mute every"
+      >
+        <MuteEverySelector
+          muteEvery={metronome.muteEvery}
+          onMuteEveryChange={metronome.setMuteEvery}
+          onClose={() => setMuteModalVisible(false)}
         />
       </SettingModal>
     </View>
@@ -196,9 +210,10 @@ const styles = StyleSheet.create({
   },
   settingsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 16,
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 500,
   },
   volumeSection: {
     width: '100%',

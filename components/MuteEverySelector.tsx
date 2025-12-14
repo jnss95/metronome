@@ -1,50 +1,45 @@
-import { SubdivisionType } from '@/hooks';
+import { MuteEveryOption } from '@/hooks';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-interface SubdivisionSelectorProps {
-  subdivision: SubdivisionType;
-  onSubdivisionChange: (subdivision: SubdivisionType) => void;
+interface MuteEverySelectorProps {
+  muteEvery: MuteEveryOption;
+  onMuteEveryChange: (value: MuteEveryOption) => void;
   onClose?: () => void;
 }
 
-const SUBDIVISION_OPTIONS: {
-  value: SubdivisionType;
+const MUTE_EVERY_OPTIONS: {
+  value: MuteEveryOption;
   label: string;
   description: string;
 }[] = [
-  { value: 'none', label: '♩', description: 'Quarter notes' },
-  { value: 'eighth', label: '♫', description: 'Eighth notes' },
-  { value: 'triplet', label: '♫³', description: 'Triplets' },
-  { value: 'sixteenth', label: '♬', description: 'Sixteenth notes' },
+  { value: 0, label: 'Off', description: 'Play every bar' },
+  { value: 2, label: '2nd', description: 'Mute bars 2, 4, 6…' },
+  { value: 3, label: '3rd', description: 'Mute bars 3, 6, 9…' },
+  { value: 4, label: '4th', description: 'Mute bars 4, 8, 12…' },
 ];
 
-// Short labels for the button display
-export const SUBDIVISION_LABELS: Record<SubdivisionType, string> = {
-  none: '♩',
-  eighth: '♫',
-  triplet: '♫³',
-  sixteenth: '♬',
+export const MUTE_EVERY_LABELS: Record<MuteEveryOption, string> = {
+  0: 'Disabled',
+  2: 'Every 2nd',
+  3: 'Every 3rd',
+  4: 'Every 4th',
 };
 
-/**
- * Subdivision selector content for modal.
- * Options: None, Eighth notes, Triplets, Sixteenths
- */
-export function SubdivisionSelector({
-  subdivision,
-  onSubdivisionChange,
+export function MuteEverySelector({
+  muteEvery,
+  onMuteEveryChange,
   onClose,
-}: SubdivisionSelectorProps) {
-  const handleSelect = (value: SubdivisionType) => {
-    onSubdivisionChange(value);
+}: MuteEverySelectorProps) {
+  const handleSelect = (value: MuteEveryOption) => {
+    onMuteEveryChange(value);
     onClose?.();
   };
 
   return (
     <View style={styles.container}>
-      {SUBDIVISION_OPTIONS.map(option => {
-        const isSelected = subdivision === option.value;
+      {MUTE_EVERY_OPTIONS.map(option => {
+        const isSelected = muteEvery === option.value;
 
         return (
           <Pressable
