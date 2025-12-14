@@ -17,6 +17,13 @@ interface BpmControlsProps {
   onTapTempo: () => void;
   isPlaying: boolean;
   onPlayToggle: () => void;
+  showActions?: boolean;
+}
+
+interface PlayControlsProps {
+  onTapTempo: () => void;
+  isPlaying: boolean;
+  onPlayToggle: () => void;
 }
 
 /**
@@ -36,6 +43,7 @@ export function BpmControls({
   onTapTempo,
   isPlaying,
   onPlayToggle,
+  showActions = true,
 }: BpmControlsProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(bpm.toString());
@@ -57,10 +65,32 @@ export function BpmControls({
     onBpmChange(parseInt(event.target.value, 10));
   };
 
+  const clampBpm = (value: number) =>
+    Math.min(maxBpm, Math.max(minBpm, Math.round(value)));
+
+  const handleHalf = () => {
+    onBpmChange(clampBpm(bpm / 2));
+  };
+
+  const handleDouble = () => {
+    onBpmChange(clampBpm(bpm * 2));
+  };
+
   return (
     <View style={styles.container}>
       {/* BPM Display with +/- buttons on sides */}
       <View style={styles.bpmRow}>
+        {/* Half tempo */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={handleHalf}
+        >
+          <Text style={styles.buttonText}>/2</Text>
+        </Pressable>
+
         {/* Left side button */}
         <Pressable
           style={({ pressed }) => [
@@ -109,6 +139,17 @@ export function BpmControls({
         >
           <Text style={styles.buttonText}>+</Text>
         </Pressable>
+
+        {/* Double tempo */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={handleDouble}
+        >
+          <Text style={styles.buttonText}>x2</Text>
+        </Pressable>
       </View>
 
       {/* Slider (Web only for now) */}
@@ -127,7 +168,24 @@ export function BpmControls({
         </View>
       )}
 
-      {/* Tap Tempo */}
+      {showActions && (
+        <PlayControls
+          onTapTempo={onTapTempo}
+          isPlaying={isPlaying}
+          onPlayToggle={onPlayToggle}
+        />
+      )}
+    </View>
+  );
+}
+
+export function PlayControls({
+  onTapTempo,
+  isPlaying,
+  onPlayToggle,
+}: PlayControlsProps) {
+  return (
+    <View style={styles.actionsRow}>
       <Pressable
         style={({ pressed }) => [
           styles.tapButton,
@@ -135,10 +193,9 @@ export function BpmControls({
         ]}
         onPress={onTapTempo}
       >
-        <Text style={styles.tapButtonText}>TAP TEMPO</Text>
+        <Text style={styles.tapButtonText}>TAP</Text>
       </Pressable>
 
-      {/* Play/Pause Button */}
       <Pressable
         style={({ pressed }) => [
           styles.playButton,
@@ -187,7 +244,7 @@ const styles = StyleSheet.create({
   bpmRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: 12,
   },
   bpmDisplay: {
     alignItems: 'center',
@@ -246,10 +303,16 @@ const styles = StyleSheet.create({
     width: 30,
     textAlign: 'center',
   },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
   tapButton: {
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 28,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 24,
     backgroundColor: colors.surfaceVariant,
   },
   tapButtonPressed: {
@@ -260,7 +323,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.onSurfaceVariant,
-    letterSpacing: 1.5,
+    letterSpacing: 1.2,
   },
   playButton: {
     flexDirection: 'row',

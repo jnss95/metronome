@@ -1,5 +1,5 @@
 export { BeatVisualizer } from './BeatVisualizer';
-export { BpmControls } from './BpmControls';
+export { BpmControls, PlayControls } from './BpmControls';
 export { MUTE_EVERY_LABELS, MuteEverySelector } from './MuteEverySelector';
 export { SettingButton } from './SettingButton';
 export { SettingModal } from './SettingModal';

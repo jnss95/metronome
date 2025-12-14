@@ -3,6 +3,7 @@ import {
   BpmControls,
   MUTE_EVERY_LABELS,
   MuteEverySelector,
+  PlayControls,
   SettingButton,
   SettingModal,
   SUBDIVISION_LABELS,
@@ -81,34 +82,45 @@ function MetronomeContent({
           isPlaying={metronome.isPlaying}
         />
 
-        {/* BPM Controls (includes Play button) */}
-        <BpmControls
-          bpm={metronome.bpm}
-          minBpm={metronome.minBpm}
-          maxBpm={metronome.maxBpm}
-          onBpmChange={metronome.setBpm}
-          onIncrement={metronome.incrementBpm}
-          onTapTempo={metronome.tapTempo}
-          isPlaying={metronome.isPlaying}
-          onPlayToggle={metronome.toggle}
-        />
+        {/* Controls Container */}
+        <View style={styles.controlsContainer}>
+          {/* BPM Controls */}
+          <BpmControls
+            bpm={metronome.bpm}
+            minBpm={metronome.minBpm}
+            maxBpm={metronome.maxBpm}
+            onBpmChange={metronome.setBpm}
+            onIncrement={metronome.incrementBpm}
+            onTapTempo={metronome.tapTempo}
+            isPlaying={metronome.isPlaying}
+            onPlayToggle={metronome.toggle}
+            showActions={false}
+          />
 
-        {/* Settings Buttons */}
-        <View style={styles.settingsRow}>
-          <SettingButton
-            label="Time"
-            value={timeSignatureDisplay}
-            onPress={() => setTimeSignatureModalVisible(true)}
-          />
-          <SettingButton
-            label="Subdivision"
-            value={subdivisionDisplay}
-            onPress={() => setSubdivisionModalVisible(true)}
-          />
-          <SettingButton
-            label="Mute every"
-            value={muteEveryDisplay}
-            onPress={() => setMuteModalVisible(true)}
+          {/* Settings Buttons */}
+          <View style={styles.settingsRow}>
+            <SettingButton
+              label="Time"
+              value={timeSignatureDisplay}
+              onPress={() => setTimeSignatureModalVisible(true)}
+            />
+            <SettingButton
+              label="Subdivision"
+              value={subdivisionDisplay}
+              onPress={() => setSubdivisionModalVisible(true)}
+            />
+            <SettingButton
+              label="Mute every"
+              value={muteEveryDisplay}
+              onPress={() => setMuteModalVisible(true)}
+            />
+          </View>
+
+          {/* Tap / Play */}
+          <PlayControls
+            onTapTempo={metronome.tapTempo}
+            isPlaying={metronome.isPlaying}
+            onPlayToggle={metronome.toggle}
           />
         </View>
 
@@ -208,12 +220,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 24,
   },
+  controlsContainer: {
+    width: 380,
+    gap: 24,
+  },
   settingsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
+    justifyContent: 'space-between',
     width: '100%',
-    maxWidth: 500,
+    gap: 8,
   },
   volumeSection: {
     width: '100%',

@@ -34,9 +34,9 @@ const colors = {
 const styles = StyleSheet.create({
   button: {
     flex: 1,
-    minWidth: 120,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    minWidth: 100,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 16,
     backgroundColor: colors.surfaceVariant,
     alignItems: 'center',
@@ -49,14 +49,14 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
     color: colors.onSurfaceVariant,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   value: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '600',
     color: colors.onSurface,
   },
