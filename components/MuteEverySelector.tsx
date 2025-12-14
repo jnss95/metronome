@@ -102,9 +102,9 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   optionSymbol: {
-    fontSize: 28,
+    fontSize: 24,
     color: colors.onSurfaceVariant,
-    width: 40,
+    width: 60,
     textAlign: 'center',
   },
   optionSymbolSelected: {
