@@ -1,6 +1,6 @@
+import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { useAudioEngine } from './useAudioEngine';
 
 export type TimeSignature = {
@@ -9,6 +9,7 @@ export type TimeSignature = {
 };
 
 export type SubdivisionType = 'none' | 'eighth' | 'triplet' | 'sixteenth';
+export type MuteEveryOption = 0 | 2 | 3 | 4;
 
 export interface MetronomeState {
   bpm: number;
@@ -18,6 +19,7 @@ export interface MetronomeState {
   currentBeat: number; // 0-indexed
   currentSubdivision: number; // 0-indexed within the beat
   volume: number;
+  muteEvery: MuteEveryOption;
 }
 
 export interface MetronomeSettings {
@@ -25,6 +27,7 @@ export interface MetronomeSettings {
   timeSignature: TimeSignature;
   subdivision: SubdivisionType;
   volume: number;
+  muteEvery: MuteEveryOption;
 }
 
 // Subdivision multipliers
@@ -53,6 +56,7 @@ interface UseMetronomeOptions {
   initialTimeSignature?: TimeSignature;
   initialSubdivision?: SubdivisionType;
   initialVolume?: number;
+  initialMuteEvery?: MuteEveryOption;
   onSettingsChange?: (settings: MetronomeSettings) => void;
 }
 
@@ -62,6 +66,7 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
     initialTimeSignature = { beats: 4, noteValue: 4 },
     initialSubdivision = 'none',
     initialVolume = 0.7,
+    initialMuteEvery = 0,
     onSettingsChange,
   } = options;
 
@@ -75,6 +80,8 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
   const [currentBeat, setCurrentBeat] = useState(0);
   const [currentSubdivision, setCurrentSubdivision] = useState(0);
   const [volume, setVolumeState] = useState(initialVolume);
+  const [muteEvery, setMuteEveryState] =
+    useState<MuteEveryOption>(initialMuteEvery);
 
   // Ref for onSettingsChange to avoid stale closures
   const onSettingsChangeRef = useRef(onSettingsChange);
@@ -95,6 +102,10 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
     setVolumeState(vol);
   }, []);
 
+  const setMuteEvery = useCallback((value: MuteEveryOption) => {
+    setMuteEveryState(value);
+  }, []);
+
   // Notify parent when settings change
   useEffect(() => {
     onSettingsChangeRef.current?.({
@@ -102,8 +113,9 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
       timeSignature,
       subdivision,
       volume,
+      muteEvery,
     });
-  }, [bpm, timeSignature, subdivision, volume]);
+  }, [bpm, timeSignature, subdivision, volume, muteEvery]);
 
   // Audio engine
   const audioEngine = useAudioEngine({ volume });
@@ -119,6 +131,8 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
   const subdivisionRef = useRef(subdivision);
   const currentBeatRef = useRef(0);
   const currentSubdivisionRef = useRef(0);
+  const muteEveryRef = useRef(muteEvery);
+  const currentBarRef = useRef(1);
 
   useEffect(() => {
     bpmRef.current = bpm;
@@ -131,6 +145,10 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
   useEffect(() => {
     subdivisionRef.current = subdivision;
   }, [subdivision]);
+
+  useEffect(() => {
+    muteEveryRef.current = muteEvery;
+  }, [muteEvery]);
 
   // Calculate interval between subdivisions in seconds
   const getSubdivisionInterval = useCallback(() => {
@@ -158,11 +176,22 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
         soundType = 'subdivision';
       }
 
-      // Schedule the sound
-      audioEngine.scheduleClick(soundType, nextNoteTimeRef.current);
+      // Determine if this entire bar should be muted
+      const muteEveryValue = muteEveryRef.current;
+      const isMutedBar =
+        muteEveryValue > 0 && currentBarRef.current % muteEveryValue === 0;
 
-      // Add haptic feedback on mobile for main beats
-      if (Platform.OS !== 'web' && currentSubdivisionRef.current === 0) {
+      // Schedule the sound when not muted
+      if (!isMutedBar) {
+        audioEngine.scheduleClick(soundType, nextNoteTimeRef.current);
+      }
+
+      // Add haptic feedback on mobile for main beats when not muted
+      if (
+        Platform.OS !== 'web' &&
+        currentSubdivisionRef.current === 0 &&
+        !isMutedBar
+      ) {
         // Use different haptic intensities for different beat types
         if (currentBeatRef.current === 0) {
           // Downbeat - stronger haptic
@@ -186,6 +215,7 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
         currentBeatRef.current++;
         if (currentBeatRef.current >= timeSignatureRef.current.beats) {
           currentBeatRef.current = 0;
+          currentBarRef.current++;
         }
       }
 
@@ -210,6 +240,7 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
     // Reset position
     currentBeatRef.current = 0;
     currentSubdivisionRef.current = 0;
+    currentBarRef.current = 1;
     setCurrentBeat(0);
     setCurrentSubdivision(0);
 
@@ -229,6 +260,9 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
     }
 
     // Reset position
+    currentBeatRef.current = 0;
+    currentSubdivisionRef.current = 0;
+    currentBarRef.current = 1;
     setCurrentBeat(0);
     setCurrentSubdivision(0);
   }, []);
@@ -310,6 +344,7 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
     currentBeat,
     currentSubdivision,
     volume,
+    muteEvery,
     subdivisionCount,
 
     // Actions
@@ -318,6 +353,7 @@ export function useMetronome(options: UseMetronomeOptions = {}) {
     setTimeSignature,
     setSubdivision,
     setVolume,
+    setMuteEvery,
     start,
     stop,
     toggle,

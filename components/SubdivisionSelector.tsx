@@ -1,10 +1,12 @@
-import { SubdivisionType } from '@/hooks';
+import { MuteEveryOption, SubdivisionType } from '@/hooks';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface SubdivisionSelectorProps {
   subdivision: SubdivisionType;
   onSubdivisionChange: (subdivision: SubdivisionType) => void;
+  muteEvery: MuteEveryOption;
+  onMuteEveryChange: (muteEvery: MuteEveryOption) => void;
   onClose?: () => void;
 }
 
@@ -27,6 +29,24 @@ export const SUBDIVISION_LABELS: Record<SubdivisionType, string> = {
   sixteenth: '♬',
 };
 
+const MUTE_EVERY_OPTIONS: {
+  value: MuteEveryOption;
+  label: string;
+  description: string;
+}[] = [
+  { value: 0, label: 'Off', description: 'Play every bar' },
+  { value: 2, label: '2nd', description: 'Mute bars 2, 4, 6…' },
+  { value: 3, label: '3rd', description: 'Mute bars 3, 6, 9…' },
+  { value: 4, label: '4th', description: 'Mute bars 4, 8, 12…' },
+];
+
+export const MUTE_EVERY_LABELS: Record<MuteEveryOption, string> = {
+  0: 'Disabled',
+  2: 'Every 2nd',
+  3: 'Every 3rd',
+  4: 'Every 4th',
+};
+
 /**
  * Subdivision selector content for modal.
  * Options: None, Eighth notes, Triplets, Sixteenths
@@ -34,10 +54,17 @@ export const SUBDIVISION_LABELS: Record<SubdivisionType, string> = {
 export function SubdivisionSelector({
   subdivision,
   onSubdivisionChange,
+  muteEvery,
+  onMuteEveryChange,
   onClose,
 }: SubdivisionSelectorProps) {
   const handleSelect = (value: SubdivisionType) => {
     onSubdivisionChange(value);
+    onClose?.();
+  };
+
+  const handleMuteSelect = (value: MuteEveryOption) => {
+    onMuteEveryChange(value);
     onClose?.();
   };
 
@@ -55,6 +82,41 @@ export function SubdivisionSelector({
               pressed && styles.optionButtonPressed,
             ]}
             onPress={() => handleSelect(option.value)}
+          >
+            <Text
+              style={[
+                styles.optionSymbol,
+                isSelected && styles.optionSymbolSelected,
+              ]}
+            >
+              {option.label}
+            </Text>
+            <Text
+              style={[
+                styles.optionLabel,
+                isSelected && styles.optionLabelSelected,
+              ]}
+            >
+              {option.description}
+            </Text>
+          </Pressable>
+        );
+      })}
+
+      <Text style={styles.sectionTitle}>Mute every</Text>
+
+      {MUTE_EVERY_OPTIONS.map(option => {
+        const isSelected = muteEvery === option.value;
+
+        return (
+          <Pressable
+            key={option.value}
+            style={({ pressed }) => [
+              styles.optionButton,
+              isSelected && styles.optionButtonSelected,
+              pressed && styles.optionButtonPressed,
+            ]}
+            onPress={() => handleMuteSelect(option.value)}
           >
             <Text
               style={[
@@ -121,5 +183,14 @@ const styles = StyleSheet.create({
   },
   optionLabelSelected: {
     color: colors.onPrimaryContainer,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.onSurfaceVariant,
+    marginTop: 12,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });

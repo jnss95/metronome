@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { MuteEveryOption } from './useMetronome';
 
 const STORAGE_KEY = '@metronome_settings';
 const DEBOUNCE_MS = 500;
@@ -12,6 +13,7 @@ export interface PersistedSettings {
   };
   subdivision: 'none' | 'eighth' | 'triplet' | 'sixteenth';
   volume: number;
+  muteEvery: MuteEveryOption;
 }
 
 const DEFAULT_SETTINGS: PersistedSettings = {
@@ -19,6 +21,7 @@ const DEFAULT_SETTINGS: PersistedSettings = {
   timeSignature: { beats: 4, noteValue: 4 },
   subdivision: 'none',
   volume: 0.7,
+  muteEvery: 0,
 };
 
 export function useSettingsPersistence() {
@@ -33,6 +36,12 @@ export function useSettingsPersistence() {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored) as PersistedSettings;
+          const sanitizedMuteEvery: MuteEveryOption =
+            parsed.muteEvery === 2 ||
+            parsed.muteEvery === 3 ||
+            parsed.muteEvery === 4
+              ? parsed.muteEvery
+              : 0;
           // Validate and merge with defaults to handle missing fields
           setSettings({
             ...DEFAULT_SETTINGS,
@@ -41,6 +50,7 @@ export function useSettingsPersistence() {
               ...DEFAULT_SETTINGS.timeSignature,
               ...parsed.timeSignature,
             },
+            muteEvery: sanitizedMuteEvery,
           });
         } else {
           setSettings(DEFAULT_SETTINGS);

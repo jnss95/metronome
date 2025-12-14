@@ -1,6 +1,7 @@
 import {
   BeatVisualizer,
   BpmControls,
+  MUTE_EVERY_LABELS,
   SettingButton,
   SettingModal,
   SUBDIVISION_LABELS,
@@ -31,6 +32,7 @@ function MetronomeContent({
     initialTimeSignature: settings.timeSignature,
     initialSubdivision: settings.subdivision,
     initialVolume: settings.volume,
+    initialMuteEvery: settings.muteEvery,
     onSettingsChange: updateSettings,
   });
 
@@ -59,6 +61,11 @@ function MetronomeContent({
 
   const timeSignatureDisplay = `${metronome.timeSignature.beats}/${metronome.timeSignature.noteValue}`;
   const subdivisionDisplay = SUBDIVISION_LABELS[metronome.subdivision];
+  const muteEveryDisplay = MUTE_EVERY_LABELS[metronome.muteEvery];
+  const subdivisionButtonValue =
+    metronome.muteEvery === 0
+      ? subdivisionDisplay
+      : `${subdivisionDisplay} · ${muteEveryDisplay}`;
 
   return (
     <View style={styles.container}>
@@ -97,7 +104,7 @@ function MetronomeContent({
           />
           <SettingButton
             label="Subdivision"
-            value={subdivisionDisplay}
+            value={subdivisionButtonValue}
             onPress={() => setSubdivisionModalVisible(true)}
           />
         </View>
@@ -132,7 +139,9 @@ function MetronomeContent({
       >
         <SubdivisionSelector
           subdivision={metronome.subdivision}
+          muteEvery={metronome.muteEvery}
           onSubdivisionChange={metronome.setSubdivision}
+          onMuteEveryChange={metronome.setMuteEvery}
           onClose={() => setSubdivisionModalVisible(false)}
         />
       </SettingModal>
