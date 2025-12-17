@@ -1,4 +1,5 @@
 export { useAudioEngine } from './useAudioEngine';
+export { useKeepAwakeWhilePlaying } from './useKeepAwakeWhilePlaying';
 export { TIME_SIGNATURE_PRESETS, useMetronome } from './useMetronome';
 export type {
   MetronomeSettings,
@@ -9,4 +10,3 @@ export type {
 } from './useMetronome';
 export { useSettingsPersistence } from './useSettingsPersistence';
 export type { PersistedSettings } from './useSettingsPersistence';
-export { useKeepAwakeWhilePlaying } from './useKeepAwakeWhilePlaying';

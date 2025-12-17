@@ -1,6 +1,6 @@
+import { activateKeepAwake, deactivateKeepAwake } from 'expo-keep-awake';
 import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
-import { activateKeepAwake, deactivateKeepAwake } from 'expo-keep-awake';
 
 /**
  * Keeps the screen awake while `isPlaying` is true.
