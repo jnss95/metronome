@@ -9,3 +9,4 @@ export type {
 } from './useMetronome';
 export { useSettingsPersistence } from './useSettingsPersistence';
 export type { PersistedSettings } from './useSettingsPersistence';
+export { useKeepAwakeWhilePlaying } from './useKeepAwakeWhilePlaying';

@@ -10,7 +10,11 @@ import {
   SubdivisionSelector,
   TimeSignatureSelector,
 } from '@/components';
-import { useMetronome, useSettingsPersistence } from '@/hooks';
+import {
+  useKeepAwakeWhilePlaying,
+  useMetronome,
+  useSettingsPersistence,
+} from '@/hooks';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -37,6 +41,9 @@ function MetronomeContent({
     onSettingsChange: updateSettings,
   });
 
+  // Keep screen awake while playing (native + web)
+  useKeepAwakeWhilePlaying(metronome.isPlaying);
+
   const [timeSignatureModalVisible, setTimeSignatureModalVisible] =
     useState(false);
   const [subdivisionModalVisible, setSubdivisionModalVisible] = useState(false);
@@ -45,9 +52,10 @@ function MetronomeContent({
   // Keyboard shortcuts (Web only)
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      // Spacebar to toggle play/pause
-      if (event.code === 'Space' && event.target === document.body) {
+      // Spacebar should always toggle play/pause, regardless of focus
+      if (event.code === 'Space' && !event.repeat) {
         event.preventDefault();
+        event.stopPropagation();
         metronome.toggle();
       }
     },
@@ -57,8 +65,11 @@ function MetronomeContent({
   useEffect(() => {
     if (Platform.OS !== 'web') return;
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () =>
+      window.removeEventListener('keydown', handleKeyDown, {
+        capture: true,
+      } as any);
   }, [handleKeyDown]);
 
   const timeSignatureDisplay = `${metronome.timeSignature.beats}/${metronome.timeSignature.noteValue}`;
