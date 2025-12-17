@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { useCallback, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 
@@ -61,7 +61,7 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
   const gainNodeRef = useRef<GainNode | null>(null);
   const silentAudioRef = useRef<HTMLAudioElement | null>(null);
   const isUnlockedRef = useRef(false);
-  const soundObjectsRef = useRef<{ [key in SoundType]?: Audio.Sound }>({});
+  const soundObjectsRef = useRef<{ [key in SoundType]?: any }>({});
 
   // Initialize audio context (Web only)
   const initAudioContext = useCallback(() => {
@@ -110,11 +110,11 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
     if (Platform.OS === 'web') return;
 
     try {
-      // Configure audio mode for playback
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
+      // Configure audio mode for playback using expo-audio
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        shouldPlayInBackground: false,
+        interruptionModeAndroid: 'duckOthers',
       });
 
       // Create sound objects for each type (using synthesized buffers)
@@ -122,12 +122,16 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
 
       for (const type of types) {
         if (!soundObjectsRef.current[type]) {
-          const { sound } = await Audio.Sound.createAsync(
-            // We'll use a data URI with synthesized audio
-            { uri: generateClickDataURI(type) },
-            { volume, shouldPlay: false }
-          );
-          soundObjectsRef.current[type] = sound;
+          // Using expo-audio: create a player from a data URI
+          const player = createAudioPlayer(generateClickDataURI(type), {
+            keepAudioSessionActive: true,
+            updateInterval: 1000,
+          });
+          // Set initial volume if supported
+          try {
+            player.setVolume?.(volume);
+          } catch {}
+          soundObjectsRef.current[type] = player;
         }
       }
     } catch (error) {
@@ -142,11 +146,11 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
         gainNodeRef.current.gain.value = volume;
       }
     } else {
-      // Update volume for all mobile sound objects
-      Object.values(soundObjectsRef.current).forEach(async sound => {
-        if (sound) {
+      // Update volume for all mobile sound players
+      Object.values(soundObjectsRef.current).forEach(player => {
+        if (player) {
           try {
-            await sound.setVolumeAsync(volume);
+            player.setVolume?.(volume);
           } catch (error) {
             console.error('Failed to set volume:', error);
           }
@@ -174,14 +178,12 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
         silentAudioRef.current = null;
       }
       isUnlockedRef.current = false;
-      // Unload mobile sounds
-      Object.values(soundObjectsRef.current).forEach(async sound => {
-        if (sound) {
-          try {
-            await sound.unloadAsync();
-          } catch (error) {
-            console.error('Failed to unload sound:', error);
-          }
+      // Release mobile players
+      Object.values(soundObjectsRef.current).forEach(player => {
+        try {
+          player?.release?.();
+        } catch (error) {
+          console.error('Failed to release audio player:', error);
         }
       });
       soundObjectsRef.current = {};
@@ -261,14 +263,16 @@ export function useAudioEngine(options: AudioEngineOptions = {}) {
   /**
    * Play click sound on mobile (iOS/Android)
    */
-  const playClickMobile = useCallback(async (type: SoundType) => {
-    const sound = soundObjectsRef.current[type];
-    if (!sound) return;
+  const playClickMobile = useCallback((type: SoundType) => {
+    const player = soundObjectsRef.current[type];
+    if (!player) return;
 
     try {
       // Replay from beginning
-      await sound.setPositionAsync(0);
-      await sound.playAsync();
+      player.seek?.(0);
+      player.play?.();
+      // Fallback to replay if available
+      player.replay?.();
     } catch (error) {
       console.error('Failed to play mobile click:', error);
     }
