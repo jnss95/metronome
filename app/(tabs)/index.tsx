@@ -9,7 +9,6 @@ import {
   SUBDIVISION_LABELS,
   SubdivisionSelector,
   TimeSignatureSelector,
-  VolumeControl,
 } from '@/components';
 import { useMetronome, useSettingsPersistence } from '@/hooks';
 import { useCallback, useEffect, useState } from 'react';
@@ -18,6 +17,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -33,7 +33,6 @@ function MetronomeContent({
     initialBpm: settings.bpm,
     initialTimeSignature: settings.timeSignature,
     initialSubdivision: settings.subdivision,
-    initialVolume: settings.volume,
     initialMuteEvery: settings.muteEvery,
     onSettingsChange: updateSettings,
   });
@@ -66,24 +65,35 @@ function MetronomeContent({
   const subdivisionDisplay = SUBDIVISION_LABELS[metronome.subdivision];
   const muteEveryDisplay = MUTE_EVERY_LABELS[metronome.muteEvery];
 
+  const { height } = useWindowDimensions();
+  const isCompact = height < 800;
+
   return (
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          !isCompact && styles.scrollContentDesktop,
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Beat Visualization */}
-        <BeatVisualizer
-          beats={metronome.timeSignature.beats}
-          subdivisionCount={metronome.subdivisionCount}
-          currentBeat={metronome.currentBeat}
-          currentSubdivision={metronome.currentSubdivision}
-          isPlaying={metronome.isPlaying}
-        />
-
         {/* Controls Container */}
-        <View style={styles.controlsContainer}>
+        <View
+          style={[
+            styles.controlsContainer,
+            isCompact && styles.controlsContainerCompact,
+          ]}
+        >
+          {/* Beat Visualization */}
+          <BeatVisualizer
+            beats={metronome.timeSignature.beats}
+            subdivisionCount={metronome.subdivisionCount}
+            currentBeat={metronome.currentBeat}
+            currentSubdivision={metronome.currentSubdivision}
+            isPlaying={metronome.isPlaying}
+          />
+
           {/* BPM Controls */}
           <BpmControls
             bpm={metronome.bpm}
@@ -121,14 +131,6 @@ function MetronomeContent({
             onTapTempo={metronome.tapTempo}
             isPlaying={metronome.isPlaying}
             onPlayToggle={metronome.toggle}
-          />
-        </View>
-
-        {/* Volume Control */}
-        <View style={styles.volumeSection}>
-          <VolumeControl
-            volume={metronome.volume}
-            onVolumeChange={metronome.setVolume}
           />
         </View>
       </ScrollView>
@@ -217,22 +219,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 40,
     paddingBottom: 40,
-    paddingHorizontal: 20,
+    paddingHorizontal: 32,
     gap: 24,
+  },
+  scrollContentDesktop: {
+    justifyContent: 'center',
   },
   controlsContainer: {
-    width: 380,
+    width: '100%',
+    maxWidth: 400,
     gap: 24,
   },
+  controlsContainerCompact: {
+    flex: 1,
+  },
   settingsRow: {
+    marginTop: 'auto',
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
     gap: 8,
-  },
-  volumeSection: {
-    width: '100%',
-    maxWidth: 400,
-    marginTop: 8,
   },
 });
